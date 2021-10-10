@@ -18,5 +18,5 @@ public class Human {
     private Integer id;
 
     @Column(name = "birthday")
-    private LocalDate x;
+    private LocalDate birthday;
 }

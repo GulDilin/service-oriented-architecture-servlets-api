@@ -2,15 +2,17 @@ package guldilin.entity;
 
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestInstance;
+import org.junit.BeforeClass;
+import org.junit.jupiter.api.*;
+import org.junit.runner.RunWith;
 
 import javax.persistence.EntityManager;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
+import javax.validation.*;
+
+import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -18,10 +20,14 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public class CityTest {
     private SessionFactory sessionFactory;
+    private Validator validator;
 
     @BeforeAll
     void setUp() {
         this.sessionFactory = SessionFactoryBuilder.getSessionFactory();
+        ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
+        validator = factory.getValidator();
+
     }
 
     @Test
@@ -48,6 +54,7 @@ public class CityTest {
 
     @Test
     void save() {
+
         EntityManager em = sessionFactory.createEntityManager();
         em.getTransaction().begin();
         Coordinates coordinates = Coordinates.builder()
@@ -60,7 +67,16 @@ public class CityTest {
                 .climate(Climate.MONSOON)
                 .coordinates(coordinates)
                 .name("Puper")
+                .area(-1)
                 .build();
+        System.out.println("Validator = " + validator);
+        ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
+        validator = factory.getValidator();
+        Set<ConstraintViolation<City>> constraintViolations = validator.validate( city );
+        constraintViolations.stream()
+                .map( c -> c.getPropertyPath().toString() + " " + c.getMessage())
+                .forEach(System.out::println);
+        System.out.println(constraintViolations);
         em.persist(city);
         em.flush();
         em.getTransaction().commit();
