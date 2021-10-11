@@ -1,14 +1,21 @@
 package guldilin.dto;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import guldilin.entity.Human;
+import lombok.*;
 
-import java.util.Date;
+import java.time.LocalDate;
 
+@EqualsAndHashCode(callSuper = true)
 @Data
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class HumanDTO {
-    private Date birthday;
+public class HumanDTO extends AbstractDTO {
+    private Integer id;
+    private LocalDate birthday;
+
+    public HumanDTO(Human human) {
+        this.id = human.getId();
+        this.birthday = human.getBirthday();
+    }
 }
