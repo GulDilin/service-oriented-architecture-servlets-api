@@ -2,6 +2,7 @@ package guldilin.entity;
 
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
+import org.hibernate.Transaction;
 import org.junit.BeforeClass;
 import org.junit.jupiter.api.*;
 import org.junit.runner.RunWith;
@@ -10,11 +11,13 @@ import javax.persistence.EntityManager;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
+import javax.transaction.Transactional;
 import javax.validation.*;
 
 import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @DisplayName("City tests")
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -38,18 +41,17 @@ public class CityTest {
 
     @Test
     void criteriaTest() {
-        EntityManager em = sessionFactory.createEntityManager();
+        Session session = sessionFactory.openSession();
 
-        em.getTransaction().begin();
-        CriteriaBuilder cb = em.getCriteriaBuilder();
-
+        CriteriaBuilder cb = session.getCriteriaBuilder();
         CriteriaQuery<City> cityCriteria = cb.createQuery(City.class);
         Root<City> cityRoot = cityCriteria.from(City.class);
         cityCriteria.select(cityRoot);
-        cityCriteria.where(cb.equal(cityRoot.get("name"), "Puper"));
-        em.createQuery(cityCriteria)
+        cityCriteria.where(cb.equal(cityRoot.get("name"), "Super"));
+        session.createQuery(cityCriteria)
                 .getResultList()
                 .forEach(System.out::println);
+        session.close();
     }
 
     @Test
@@ -66,39 +68,66 @@ public class CityTest {
         City city = City.builder()
                 .climate(Climate.MONSOON)
                 .coordinates(coordinates)
-                .name("Puper")
+                .name("Duper")
                 .area(-1)
                 .build();
-        System.out.println("Validator = " + validator);
         ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
         validator = factory.getValidator();
         Set<ConstraintViolation<City>> constraintViolations = validator.validate( city );
         constraintViolations.stream()
                 .map( c -> c.getPropertyPath().toString() + " " + c.getMessage())
                 .forEach(System.out::println);
-        System.out.println(constraintViolations);
-        em.persist(city);
-        em.flush();
-        em.getTransaction().commit();
+        assertThrows(ValidationException.class, () -> em.persist(city));
+    }
+
+    @Test
+    void saveOk() {
+        Session session = sessionFactory.openSession();
+        Transaction transaction = session.beginTransaction();
+        Coordinates coordinates = Coordinates.builder()
+                .x(0L)
+                .y(0)
+                .build();
+        session.save(coordinates);
+        System.out.println(coordinates.toString());
+
+        City city = City.builder()
+                .climate(Climate.MONSOON)
+                .coordinates(coordinates)
+                .name("Duper")
+                .area(2)
+                .population(2)
+                .build();
+        session.save(city);
+        transaction.commit();
         System.out.println(city.toString());
+
+        CriteriaBuilder cb = session.getCriteriaBuilder();
+        CriteriaQuery<City> cityCriteria = cb.createQuery(City.class);
+        Root<City> cityRoot = cityCriteria.from(City.class);
+        cityCriteria.select(cityRoot);
+        session.createQuery(cityCriteria)
+                .getResultList()
+                .forEach(System.out::println);
+        session.close();
     }
 
     @Test
     void delete() {
-        EntityManager em = sessionFactory.createEntityManager();
+        Session session = sessionFactory.openSession();
 
-        em.getTransaction().begin();
-        CriteriaBuilder cb = em.getCriteriaBuilder();
-
+        session.getTransaction().begin();
+        CriteriaBuilder cb = session.getCriteriaBuilder();
         CriteriaQuery<City> cityCriteria = cb.createQuery(City.class);
         Root<City> cityRoot = cityCriteria.from(City.class);
         cityCriteria.select(cityRoot);
         cityCriteria.where(cb.equal(cityRoot.get("name"), "Puper"));
-        em.createQuery(cityCriteria)
+        session.createQuery(cityCriteria)
                 .getResultList()
-                .forEach(em::remove);
-        em.getTransaction().commit();
-        assertEquals(em.createQuery(cityCriteria).getResultList().size(), 0);
+                .forEach(session::remove);
+        session.getTransaction().commit();
+        assertEquals(session.createQuery(cityCriteria).getResultList().size(), 0);
+        session.close();
 
     }
 }
