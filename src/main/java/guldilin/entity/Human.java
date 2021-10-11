@@ -1,17 +1,20 @@
 package guldilin.entity;
 
+import guldilin.dto.HumanDTO;
 import lombok.*;
 
 import javax.persistence.*;
 import java.time.LocalDate;
+import java.util.List;
 
+@EqualsAndHashCode(callSuper = true)
 @Entity(name="human")
 @Data
-@NoArgsConstructor
-@AllArgsConstructor
 @Builder
 @ToString
-public class Human {
+@AllArgsConstructor
+@NoArgsConstructor
+public class Human extends AbstractEntity {
     @Column(name = "id")
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -19,4 +22,9 @@ public class Human {
 
     @Column(name = "birthday")
     private LocalDate birthday;
+
+    @Override
+    public Object mapToDTO() {
+        return new HumanDTO(this);
+    }
 }

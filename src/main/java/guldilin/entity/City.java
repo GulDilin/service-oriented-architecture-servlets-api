@@ -1,5 +1,6 @@
 package guldilin.entity;
 
+import guldilin.dto.CityDTO;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 
@@ -8,20 +9,22 @@ import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
+import java.sql.Timestamp;
 
+@EqualsAndHashCode(callSuper = true)
 @Entity(name = "city")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
 @ToString
-public class City {
+public class City extends AbstractEntity {
     @Column(name = "id")
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    @Column(name = "name")
+    @Column(name = "name", nullable = false)
     @NotBlank
     private String name;
 
@@ -29,17 +32,17 @@ public class City {
     @JoinColumn(name = "coordinates_id", nullable = false)
     private Coordinates coordinates;
 
-    @Column(name = "created")
-    @NotNull
+    @Column(name = "created", nullable = false, updatable = false)
     @CreationTimestamp
-    private java.sql.Timestamp creationDate;
+    private Timestamp creationDate;
 
-    @Column(name = "area")
+
+    @Column(name = "area", nullable = false)
     @NotNull
     @Min(0)
     private Integer area;
 
-    @Column(name = "population")
+    @Column(name = "population", nullable = false)
     @NotNull
     @Min(0)
     private Integer population;
@@ -56,7 +59,7 @@ public class City {
     @Max(1000)
     private Integer carCode;
 
-    @Column(name = "climate")
+    @Column(name = "climate", nullable = false)
     @NotNull
     @Enumerated(EnumType.STRING)
     private Climate climate;
@@ -64,4 +67,9 @@ public class City {
     @ManyToOne
     @JoinColumn(name = "governor_id")
     private Human governor;
+
+    @Override
+    public CityDTO mapToDTO() {
+        return new CityDTO(this);
+    }
 }
