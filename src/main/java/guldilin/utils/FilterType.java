@@ -8,8 +8,11 @@ import lombok.Getter;
 public enum FilterType {
     LESS_THAN("lt"),
     GREATER_THAN("gt"),
+    GREATER_THAN_OR_EQUALS("gte"),
+    LESS_THAN_OR_EQUALS("lte"),
     EQUALS("eq"),
-    CONTAINS("in");
+    CONTAINS("in"),
+    IS_NULL("isnull");
 
     private final String key;
 }
