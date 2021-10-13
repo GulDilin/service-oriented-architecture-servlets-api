@@ -12,4 +12,5 @@ import lombok.NoArgsConstructor;
 public class FilterAction {
     private FilterableField filterableField;
     private FilterType filterType;
+    private String value;
 }
