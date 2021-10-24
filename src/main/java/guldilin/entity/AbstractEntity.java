@@ -9,8 +9,6 @@ import java.util.Collections;
 import java.util.List;
 
 @Data
-@AllArgsConstructor
-@NoArgsConstructor
 public abstract class AbstractEntity implements Mappable, Filterable {
     public static List<FilterableField> getFilterableFields() {
         return Collections.emptyList();

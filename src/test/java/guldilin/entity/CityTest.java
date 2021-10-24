@@ -3,9 +3,7 @@ package guldilin.entity;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
-import org.junit.BeforeClass;
 import org.junit.jupiter.api.*;
-import org.junit.runner.RunWith;
 
 import javax.persistence.EntityManager;
 import javax.persistence.criteria.CriteriaBuilder;

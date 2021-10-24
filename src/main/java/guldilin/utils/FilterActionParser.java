@@ -6,9 +6,10 @@ import guldilin.errors.FilterTypeNotSupported;
 import java.util.Arrays;
 
 public class FilterActionParser {
-    public static FilterAction parse(String actionString, FilterActionType actionType)
+    public static FilterAction parse(String actionString, FilterableField filterableField)
             throws FilterTypeNotFound, FilterTypeNotSupported {
         String [] parts = actionString.split(":", 2);
+        FilterActionType actionType = filterableField.getActionType();
         FilterType filterType;
         String value = null;
         if (!actionString.contains(":")) {
@@ -30,6 +31,7 @@ public class FilterActionParser {
         }
         return FilterAction.builder()
                 .filterType(filterType)
+                .filterableField(filterableField)
                 .value(value)
                 .build();
     }

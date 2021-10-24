@@ -24,7 +24,7 @@ public class Human extends AbstractEntity {
     private LocalDate birthday;
 
     @Override
-    public Object mapToDTO() {
+    public HumanDTO mapToDTO() {
         return new HumanDTO(this);
     }
 }

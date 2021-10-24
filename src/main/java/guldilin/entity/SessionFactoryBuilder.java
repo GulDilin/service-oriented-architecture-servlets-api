@@ -41,6 +41,7 @@ public class SessionFactoryBuilder {
                     Optional.ofNullable(System.getenv("DB_USE_SQL_COMMENTS"))
                             .orElse("false"));
             settings.put(Environment.HBM2DDL_AUTO, "update");
+            settings.put(Environment.DIALECT, "org.hibernate.dialect.PostgreSQLDialect");
             configuration.setProperties(settings);
             configuration.addAnnotatedClass(Human.class);
             configuration.addAnnotatedClass(City.class);

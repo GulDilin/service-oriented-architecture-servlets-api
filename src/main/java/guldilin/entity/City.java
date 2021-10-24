@@ -1,6 +1,8 @@
 package guldilin.entity;
 
 import guldilin.dto.CityDTO;
+import guldilin.utils.FilterActionType;
+import guldilin.utils.FilterableField;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 
@@ -10,6 +12,8 @@ import javax.validation.constraints.Min;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import java.sql.Timestamp;
+import java.util.Arrays;
+import java.util.List;
 
 @EqualsAndHashCode(callSuper = true)
 @Entity(name = "city")
@@ -19,6 +23,13 @@ import java.sql.Timestamp;
 @Builder
 @ToString
 public class City extends AbstractEntity {
+    public static List<FilterableField> getFilterableFields() {
+        return Arrays.asList(
+                new FilterableField<>(Long.class, FilterActionType.COMPARABLE, "id", Long::parseLong),
+                new FilterableField<>(String.class, FilterActionType.COMPARABLE, "name", s -> s)
+        );
+    }
+
     @Column(name = "id")
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
