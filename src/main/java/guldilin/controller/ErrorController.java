@@ -38,6 +38,7 @@ public class ErrorController extends HttpServlet {
         this.statusesMap.put(UnknownFilterType.class.getName(), HttpServletResponse.SC_BAD_REQUEST);
         this.statusesMap.put(javax.persistence.NoResultException.class.getName(), HttpServletResponse.SC_BAD_REQUEST);
         this.statusesMap.put(NumberFormatException.class.getName(), HttpServletResponse.SC_BAD_REQUEST);
+        this.statusesMap.put(EnumerationConstantNotFound.class.getName(), HttpServletResponse.SC_BAD_REQUEST);
 
 
     }

@@ -3,7 +3,10 @@ package guldilin.utils;
 import com.google.gson.*;
 import com.google.gson.reflect.TypeToken;
 import com.google.gson.stream.JsonReader;
+import com.google.gson.stream.JsonToken;
 import com.google.gson.stream.JsonWriter;
+import guldilin.entity.Climate;
+import guldilin.errors.EnumerationConstantNotFound;
 import guldilin.errors.ErrorCode;
 import guldilin.errors.ErrorCodesFactory;
 import guldilin.errors.ValidationException;
@@ -50,10 +53,44 @@ public class GsonFactoryBuilder {
         }
     }
 
+    static class EnumAdapter<T extends Enum<T>> extends TypeAdapter<T> {
+        private final Class<T> tClass;
+
+        public EnumAdapter(Class<T> tClass) {
+            super();
+            this.tClass = tClass;
+        }
+
+        @Override
+        public void write(JsonWriter writer, T value) throws IOException {
+            if (value == null) {
+                writer.nullValue();
+                return;
+            }
+            writer.value(String.valueOf(value));
+        }
+
+        @SneakyThrows
+        @Override
+        public T read(JsonReader reader) {
+            if (reader.peek() == JsonToken.NULL) {
+                reader.nextNull();
+                return null;
+            }
+            String stringValue = reader.nextString();
+            try {
+                return T.valueOf(this.tClass, stringValue);
+            } catch (IllegalArgumentException e) {
+               throw new JsonSyntaxException(new EnumerationConstantNotFound());
+            }
+        }
+    }
+
     public static Gson getGson() {
         if (gson != null) return gson;
         gson = new GsonBuilder()
                 .registerTypeAdapterFactory(new IgnoreFailureTypeAdapterFactory())
+                .registerTypeAdapter(Climate.class, new EnumAdapter<>(Climate.class))
                 .serializeNulls()
                 .setDateFormat("yyyy-MM-dd HH:mm:ss")
                 .create();

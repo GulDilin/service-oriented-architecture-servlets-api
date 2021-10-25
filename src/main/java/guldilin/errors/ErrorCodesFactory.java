@@ -20,6 +20,7 @@ public class ErrorCodesFactory {
         map.put(UnknownFilterType.class.getName(), ErrorCode.FILTER_TYPE_NOT_FOUND);
         map.put(javax.persistence.NoResultException.class.getName(), ErrorCode.ENTRY_NOT_FOUND);
         map.put(NumberFormatException.class.getName(), ErrorCode.INCORRECT_NUMBER_FORMAT);
+        map.put(EnumerationConstantNotFound.class.getName(), ErrorCode.ENUM_CONSTANT_NOT_FOUND);
 
         return map;
     }
