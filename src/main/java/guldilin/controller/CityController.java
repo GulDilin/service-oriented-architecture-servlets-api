@@ -9,12 +9,10 @@ import guldilin.errors.ValidationException;
 import guldilin.repository.implementation.CrudRepositoryImpl;
 import lombok.SneakyThrows;
 
-import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.Objects;
 
@@ -70,7 +68,7 @@ public class CityController extends HttpServlet {
 
     @SneakyThrows
     @Override
-    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
+    protected void doPost(HttpServletRequest request, HttpServletResponse response) {
         crudController.doPost(request, response);
     }
 
@@ -82,7 +80,7 @@ public class CityController extends HttpServlet {
 
     @SneakyThrows
     @Override
-    protected void doDelete(HttpServletRequest request, HttpServletResponse response) throws ServletException {
+    protected void doDelete(HttpServletRequest request, HttpServletResponse response) {
         crudController.doDelete(request);
     }
 }

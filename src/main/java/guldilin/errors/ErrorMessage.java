@@ -8,6 +8,8 @@ public class ErrorMessage {
     public static final String MAX_1000 = "Min value is 1000";
     public static final String IS_INTEGER = "Need to be integer";
     public static final String NOT_FOUND = "Entry not found";
-    public static final String UNKNOWN = "Unknown error";
-    public static final String INCORRECT_NUMBER_FORMAT = "Unknown error";
+    public static final String FILTER_TYPE_NOT_FOUND = "Filter type not found";
+    public static final String FILTER_TYPE_NOT_SUPPORTED = "Filter type not supported";
+    public static final String CONTENT_TYPE_NOT_SUPPORTED = "Content type not supported";
+    public static final String METHOD_NOT_SUPPORTED = "Method not supported";
 }

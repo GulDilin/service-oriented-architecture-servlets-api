@@ -15,7 +15,6 @@ import guldilin.utils.GsonFactoryBuilder;
 import lombok.Data;
 import org.hibernate.Session;
 
-import javax.persistence.EntityNotFoundException;
 import javax.persistence.Query;
 import javax.persistence.criteria.*;
 import javax.servlet.http.HttpServletRequest;
@@ -49,10 +48,10 @@ public class CrudController<T extends AbstractEntity, D extends AbstractDTO> {
         this.gson = GsonFactoryBuilder.getGson();
     }
 
-    void doGetById(Integer id, HttpServletResponse response) throws IOException {
+    void doGetById(Integer id, HttpServletResponse response) throws IOException, EntryNotFound {
         response.getWriter().write(gson.toJson(
                 repository.findById(id)
-                        .orElseThrow(EntityNotFoundException::new)
+                        .orElseThrow(EntryNotFound::new)
                         .mapToDTO()));
     }
 
@@ -123,7 +122,7 @@ public class CrudController<T extends AbstractEntity, D extends AbstractDTO> {
     }
 
     void doGet(HttpServletRequest request, HttpServletResponse response)
-            throws IOException, FilterTypeNotFound, FilterTypeNotSupported {
+            throws IOException, FilterTypeNotFound, FilterTypeNotSupported, EntryNotFound {
         Optional<Integer> id = Optional.ofNullable((Integer) request.getAttribute("id"));
         if (id.isPresent()) {
             this.doGetById(id.get(), response);

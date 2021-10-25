@@ -1,6 +1,7 @@
 package guldilin.dto;
 
 import guldilin.entity.Coordinates;
+import guldilin.errors.ErrorMessage;
 import lombok.*;
 
 import javax.validation.constraints.Min;
@@ -13,7 +14,7 @@ import javax.validation.constraints.Min;
 public class CoordinatesDTO extends AbstractDTO {
     private Integer id;
     private Long x;
-    private @Min(-667) Integer y;
+    private @Min(value = -667, message = ErrorMessage.MIN_N667) Integer y;
 
     public CoordinatesDTO(Coordinates coordinates) {
         this.id = coordinates.getId();

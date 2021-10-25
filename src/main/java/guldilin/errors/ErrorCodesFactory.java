@@ -1,5 +1,6 @@
 package guldilin.errors;
 
+import javax.persistence.EntityNotFoundException;
 import java.util.HashMap;
 
 public class ErrorCodesFactory {
@@ -12,6 +13,7 @@ public class ErrorCodesFactory {
         map.put(UnsupportedMethod.class.getName(), ErrorCode.METHOD_NOT_SUPPORTED);
         map.put(UnsupportedContentType.class.getName(), ErrorCode.CONTENT_TYPE_NOT_SUPPORTED);
         map.put(EntryNotFound.class.getName(), ErrorCode.ENTRY_NOT_FOUND);
+        map.put(EntityNotFoundException.class.getName(), ErrorCode.ENTRY_NOT_FOUND);
         map.put(ResourceNotFound.class.getName(), ErrorCode.RESOURCE_NOT_FOUND);
         map.put(FilterTypeNotFound.class.getName(), ErrorCode.FILTER_TYPE_NOT_FOUND);
         map.put(FilterTypeNotSupported.class.getName(), ErrorCode.FILTER_TYPE_NOT_SUPPORTED);

@@ -7,6 +7,7 @@ import guldilin.dto.ValidationErrorDTO;
 import guldilin.errors.*;
 import guldilin.utils.GsonFactoryBuilder;
 
+import javax.persistence.EntityNotFoundException;
 import javax.persistence.PersistenceException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -19,17 +20,18 @@ import java.util.Map;
 public class ErrorController extends HttpServlet {
 
     private final Gson gson;
-    private final Map<String, ErrorCode> errosMap;
+    private final Map<String, ErrorCode> errorsMap;
     private final Map<String, Integer> statusesMap;
 
     public ErrorController() {
         this.gson = GsonFactoryBuilder.getGson();
-        this.errosMap = ErrorCodesFactory.getErrorCodesMap();
+        this.errorsMap = ErrorCodesFactory.getErrorCodesMap();
         this.statusesMap = new HashMap<>();
 
         this.statusesMap.put(UnsupportedMethod.class.getName(), HttpServletResponse.SC_BAD_REQUEST);
         this.statusesMap.put(UnsupportedContentType.class.getName(), HttpServletResponse.SC_BAD_REQUEST);
         this.statusesMap.put(EntryNotFound.class.getName(), HttpServletResponse.SC_NOT_FOUND);
+        this.statusesMap.put(EntityNotFoundException.class.getName(), HttpServletResponse.SC_NOT_FOUND);
         this.statusesMap.put(ResourceNotFound.class.getName(), HttpServletResponse.SC_BAD_REQUEST);
         this.statusesMap.put(FilterTypeNotFound.class.getName(), HttpServletResponse.SC_BAD_REQUEST);
         this.statusesMap.put(FilterTypeNotSupported.class.getName(), HttpServletResponse.SC_BAD_REQUEST);
@@ -65,9 +67,10 @@ public class ErrorController extends HttpServlet {
                                   Throwable throwable, String errorName) {
         Integer statusCode = (Integer) request.getAttribute("javax.servlet.error.status_code");
         ErrorCode errorCode = ErrorCode.INTERNAL_SERVER_ERROR;
+        throwable.printStackTrace();
 
         if (this.statusesMap.containsKey(errorName)) statusCode = this.statusesMap.get(errorName);
-        if (this.errosMap.containsKey(errorName)) errorCode = this.errosMap.get(errorName);
+        if (this.errorsMap.containsKey(errorName)) errorCode = this.errorsMap.get(errorName);
         response.setStatus(statusCode);
         return ErrorDTO.builder()
                 .error(errorCode.name())
@@ -82,14 +85,14 @@ public class ErrorController extends HttpServlet {
         return handleException(request, response, persistenceException.getCause());
     }
 
-    protected Object handleJsonException(HttpServletRequest request, HttpServletResponse response,
+    protected Object handleJsonException(HttpServletResponse response,
                                                 Throwable throwable) {
         throwable.printStackTrace();
         JsonSyntaxException jsonSyntaxException = (JsonSyntaxException) throwable;
         response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
         ErrorCode code = ErrorCode.JSON_SYNTAX_ERROR;
         String cause = jsonSyntaxException.getCause().getClass().getName();
-        if (this.errosMap.containsKey(cause)) code = errosMap.get(cause);
+        if (this.errorsMap.containsKey(cause)) code = errorsMap.get(cause);
         return ErrorDTO.builder()
                 .error(code.name())
                 .message(jsonSyntaxException.getCause().getMessage())
@@ -108,7 +111,7 @@ public class ErrorController extends HttpServlet {
             case "javax.persistence.PersistenceException":
                 return handlePersistenceException(request, response, throwable);
             case "com.google.gson.JsonSyntaxException":
-                return handleJsonException(request, response, throwable);
+                return handleJsonException(response, throwable);
             default:
                 return handleDefaultError(request, response, throwable, errorName);
         }
