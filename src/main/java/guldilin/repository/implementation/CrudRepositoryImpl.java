@@ -1,7 +1,6 @@
 package guldilin.repository.implementation;
 
 import guldilin.entity.AbstractEntity;
-import guldilin.entity.Mappable;
 import guldilin.entity.SessionFactoryBuilder;
 import guldilin.errors.EntryNotFound;
 import guldilin.repository.interfaces.CrudRepository;
