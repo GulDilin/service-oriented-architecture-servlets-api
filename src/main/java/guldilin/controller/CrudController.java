@@ -94,6 +94,21 @@ public class CrudController<T extends AbstractEntity, D extends AbstractDTO> {
         criteria.where(cb.and(predicates.toArray(new Predicate[predicates.size()])));
     }
 
+    private Long getTotalCount(HttpServletRequest request) throws FilterTypeNotFound, FilterTypeNotSupported {
+        Session session = repository.openSession();
+        CriteriaBuilder cbCount = session.getCriteriaBuilder();
+        CriteriaQuery<Long> criteriaCount = cbCount.createQuery(Long.class);
+        Root<T> rootCount = criteriaCount.from(entityClass);
+        criteriaCount.select(cbCount.count(rootCount));
+
+        applyFilters(request, cbCount, criteriaCount, rootCount);
+
+        Query queryCount = session.createQuery(criteriaCount);
+        Long total = (Long) queryCount.getSingleResult();
+        session.close();
+        return total;
+    }
+
     void doGet(HttpServletRequest request, HttpServletResponse response)
             throws IOException, FilterTypeNotFound, FilterTypeNotSupported {
         Optional<Integer> id = Optional.ofNullable((Integer) request.getAttribute("id"));
@@ -106,12 +121,13 @@ public class CrudController<T extends AbstractEntity, D extends AbstractDTO> {
         Integer offset = Optional.ofNullable(request.getParameter("offset")).map(Integer::parseInt).orElse(0);
         String[] orderings = request.getParameterValues("sorting");
 
+        Long total = getTotalCount(request);
+
         Session session = repository.openSession();
         CriteriaBuilder cb = session.getCriteriaBuilder();
         CriteriaQuery<T> criteria = cb.createQuery(entityClass);
         Root<T> root = criteria.from(entityClass);
         criteria.select(root);
-
 
         if (orderings != null) applyOrders(orderings, cb, criteria, root);
         applyFilters(request, cb, criteria, root);
@@ -124,7 +140,7 @@ public class CrudController<T extends AbstractEntity, D extends AbstractDTO> {
         entries.forEach(System.out::println);
         EntityListDTO listDTO = new EntityListDTO();
         listDTO.setResults(entries.stream().map(T::mapToDTO).collect(Collectors.toList()));
-        listDTO.setTotal((long) entries.size());
+        listDTO.setTotal(total);
 
         response.getWriter().write(gson.toJson(listDTO));
         session.close();
