@@ -2,8 +2,9 @@ package guldilin.filter;
 
 
 import com.google.gson.Gson;
-import guldilin.dto.CityDTO;
 import guldilin.errors.ResourceNotFound;
+import guldilin.errors.UnsupportedContentType;
+import guldilin.errors.UnsupportedMethod;
 import lombok.SneakyThrows;
 
 import javax.servlet.*;
@@ -14,7 +15,7 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.Locale;
 
-@WebFilter("/api/coordinates/*")
+@WebFilter({"/api/coordinates/*", "/api/city/*", "/api/human/*"})
 public class CrudFilter implements Filter {
     private Gson gson;
 
@@ -23,6 +24,7 @@ public class CrudFilter implements Filter {
         this.gson = new Gson();
     }
 
+    @SneakyThrows
     @Override
     public void doFilter(ServletRequest servletRequest,
                          ServletResponse servletResponse,
@@ -31,23 +33,26 @@ public class CrudFilter implements Filter {
         HttpServletRequest request = (HttpServletRequest) servletRequest;
         HttpServletResponse response = (HttpServletResponse) servletResponse;
         String method = request.getMethod().toLowerCase(Locale.ROOT);
-        System.out.println("");
-        if (Arrays.asList("post", "put").contains(method)) {
-            request.setAttribute("body", gson.fromJson(servletRequest.getReader(), CityDTO.class));
+        String contendType = "application/json";
+        System.out.println(request.getContentType());
+        if (Arrays.asList("post", "put").contains(method) &&
+                (request.getContentType() == null ||
+                !request.getContentType().equals(contendType))) throw new UnsupportedContentType();
+
+        if (Arrays.asList("delete", "put").contains(method) &&
+                request.getPathInfo() == null) {
+            throw new UnsupportedMethod();
         }
-        if (Arrays.asList("get", "delete").contains(method)) {
-            System.out.println("request.getPathInfo() " + request.getPathInfo());
-            if (request.getPathInfo() != null) {
-                try {
-                    Long id = Long.valueOf(request.getPathInfo().replaceAll("^/", ""));
-                    request.setAttribute("id", id);
-                } catch (NumberFormatException e) {
-                    System.out.println("Cannot convert id");
-//                    throw new ResourceNotFound();
-                }
+
+        if (Arrays.asList("get", "delete", "put").contains(method) && request.getPathInfo() != null) {
+            try {
+                Integer id = Integer.parseInt(request.getPathInfo().replaceAll("^/", ""));
+                request.setAttribute("id", id);
+            } catch (NumberFormatException e) {
+                throw new ResourceNotFound();
             }
         }
-        response.setContentType("application/json");
+        response.setContentType(contendType);
 
         filterChain.doFilter(request, response);
     }

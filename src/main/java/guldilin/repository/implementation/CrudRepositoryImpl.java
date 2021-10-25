@@ -1,5 +1,6 @@
 package guldilin.repository.implementation;
 
+import guldilin.entity.AbstractEntity;
 import guldilin.entity.Mappable;
 import guldilin.entity.SessionFactoryBuilder;
 import guldilin.errors.EntryNotFound;
@@ -15,7 +16,7 @@ import javax.validation.Valid;
 import java.util.List;
 import java.util.Optional;
 
-public class CrudRepositoryImpl<T extends Mappable> implements CrudRepository<T> {
+public class CrudRepositoryImpl<T extends AbstractEntity> implements CrudRepository<T> {
     private final SessionFactory sessionFactory;
     private final Class<T> tClass;
 
@@ -31,22 +32,26 @@ public class CrudRepositoryImpl<T extends Mappable> implements CrudRepository<T>
     }
 
     @Override
-    public Optional<T> findById(Long id) {
+    public Optional<T> findById(Integer id) {
         EntityManager em = sessionFactory.createEntityManager();
         CriteriaBuilder cb = em.getCriteriaBuilder();
         CriteriaQuery<T> query = cb.createQuery(tClass);
         Root<T> root = query.from(tClass);
         query.select(root);
         query.where(cb.equal(root.get("id"), id));
-        return Optional.ofNullable(em.createQuery(query).getSingleResult());
+        try {
+            return Optional.ofNullable(em.createQuery(query).getSingleResult());
+        } catch (Exception exception) {
+            return Optional.empty();
+        }
     }
 
     @Override
-    public T update(@Valid T entry) {
+    public T update(@Valid T entry) throws EntryNotFound {
         EntityManager em = sessionFactory.createEntityManager();
         em.getTransaction().begin();
-        em.persist(entry);
-        em.flush();
+        this.findById(entry.getId()).orElseThrow(EntryNotFound::new);
+        em.merge(entry);
         em.getTransaction().commit();
         return entry;
     }
@@ -60,7 +65,7 @@ public class CrudRepositoryImpl<T extends Mappable> implements CrudRepository<T>
     }
 
     @Override
-    public void deleteById(Long id) throws EntryNotFound {
+    public void deleteById(Integer id) throws EntryNotFound {
         EntityManager em = sessionFactory.createEntityManager();
         em.getTransaction().begin();
         em.remove(this.findById(id).orElseThrow(EntryNotFound::new));

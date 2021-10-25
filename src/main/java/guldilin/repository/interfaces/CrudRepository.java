@@ -12,13 +12,13 @@ import java.util.Optional;
 public interface CrudRepository<T extends Mappable> {
     List<T> findByCriteria(CriteriaQuery<T> criteriaQuery);
 
-    Optional<T> findById(Long id);
+    Optional<T> findById(Integer id);
 
-    T update(T coordinates);
+    T update(T entry) throws EntryNotFound;
 
-    void save(T coordinates);
+    void save(T entry);
 
-    void deleteById(Long id) throws EntryNotFound;
+    void deleteById(Integer id) throws EntryNotFound;
 
     EntityManager createEntityManager();
 

@@ -36,7 +36,7 @@ public class City extends AbstractEntity {
     private Integer id;
 
     @Column(name = "name", nullable = false)
-    @NotBlank
+    @NotBlank(message = ValidationMessages.NOT_BLANK)
     private String name;
 
     @ManyToOne
@@ -49,29 +49,29 @@ public class City extends AbstractEntity {
 
 
     @Column(name = "area", nullable = false)
-    @NotNull
-    @Min(0)
+    @NotNull(message = ValidationMessages.NOT_NULL)
+    @Min(value = 0, message = ValidationMessages.MIN_0)
     private Integer area;
 
     @Column(name = "population", nullable = false)
-    @NotNull
-    @Min(0)
+    @NotNull(message = ValidationMessages.NOT_NULL)
+    @Min(value = 0, message = ValidationMessages.MIN_0)
     private Integer population;
 
     @Column(name = "meters_above_sea_level")
     private Float metersAboveSeaLevel;
 
     @Column(name = "population_density")
-    @Min(0)
+    @Min(value = 0, message = ValidationMessages.MIN_0)
     private Integer populationDensity;
 
     @Column(name = "car_code")
-    @Min(0)
-    @Max(1000)
+    @Min(value = 0, message = ValidationMessages.MIN_0)
+    @Max(value = 1000, message = ValidationMessages.MAX_1000)
     private Integer carCode;
 
     @Column(name = "climate", nullable = false)
-    @NotNull
+    @NotNull(message = ValidationMessages.NOT_NULL)
     @Enumerated(EnumType.STRING)
     private Climate climate;
 

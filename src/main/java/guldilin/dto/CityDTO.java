@@ -1,5 +1,6 @@
 package guldilin.dto;
 
+import guldilin.entity.AbstractEntity;
 import guldilin.entity.City;
 import guldilin.entity.Climate;
 import lombok.*;

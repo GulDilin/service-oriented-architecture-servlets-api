@@ -35,7 +35,7 @@ public class Coordinates extends AbstractEntity {
     private Long x;
 
     @Column(name = "y")
-    @Min(-667)
+    @Min(value = -667, message = ValidationMessages.MIN_N667)
     private Integer y;
 
     @Override

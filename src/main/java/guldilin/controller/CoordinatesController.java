@@ -2,7 +2,9 @@ package guldilin.controller;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import guldilin.dto.CoordinatesDTO;
 import guldilin.entity.Coordinates;
+import guldilin.errors.EntryNotFound;
 import guldilin.errors.FilterTypeNotFound;
 import guldilin.errors.FilterTypeNotSupported;
 import guldilin.repository.implementation.CrudRepositoryImpl;
@@ -16,28 +18,61 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
 @WebServlet("/api/coordinates/*")
-public class CoordinatesController  extends HttpServlet {
+public class CoordinatesController extends HttpServlet {
     private CrudRepositoryImpl<Coordinates> repository;
-    private CrudController<Coordinates> crudController;
+    private CrudController<Coordinates, CoordinatesDTO> crudController;
     private Gson gson;
 
     public CoordinatesController() {
         repository = new CrudRepositoryImpl<>(Coordinates.class);
         gson = new GsonBuilder().serializeNulls().create();
-        crudController = new CrudController<>(repository, Coordinates.class, gson, Coordinates::getFilterableFields);
+        crudController = new CrudController<>(
+                Coordinates.class,
+                CoordinatesDTO.class,
+                repository,
+                gson,
+                Coordinates::getFilterableFields,
+                this::mapToEntity);
+    }
+
+    private Coordinates mapToEntity(CoordinatesDTO dto) {
+        return Coordinates.builder()
+                .id(dto.getId())
+                .x(dto.getX())
+                .y(dto.getY())
+                .build();
+    };
+
+    @Override
+    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        try {
+            crudController.doGet(request, response);
+        } catch (FilterTypeNotFound filterTypeNotFound) {
+            response.getWriter().write(filterTypeNotFound.getMessage());
+            filterTypeNotFound.printStackTrace();
+        } catch (FilterTypeNotSupported filterTypeNotSupported) {
+            response.getWriter().write(filterTypeNotSupported.getMessage());
+            filterTypeNotSupported.printStackTrace();
+        }
     }
 
     @Override
-    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        System.out.println("GEEEET REQUEEEEST____________________");
+    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        crudController.doPost(request, response);
+    }
+
+    @SneakyThrows
+    @Override
+    protected void doPut(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        crudController.doPut(request, response);
+    }
+
+    @Override
+    protected void doDelete(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         try {
-            crudController.doGet(req, resp);
-        } catch (FilterTypeNotFound filterTypeNotFound) {
-            resp.getWriter().write(filterTypeNotFound.getMessage());
-            filterTypeNotFound.printStackTrace();
-        } catch (FilterTypeNotSupported filterTypeNotSupported) {
-            resp.getWriter().write(filterTypeNotSupported.getMessage());
-            filterTypeNotSupported.printStackTrace();
+            crudController.doDelete(request);
+        } catch (EntryNotFound entryNotFound) {
+            throw new ServletException(entryNotFound);
         }
     }
 }
