@@ -2,5 +2,6 @@ package guldilin.utils;
 
 public enum FilterActionType {
     COMPARABLE,
-    EQUAL_ONLY
+    EQUAL_ONLY,
+    CONTAINS,
 }

@@ -3,16 +3,13 @@ package guldilin.controller;
 
 import guldilin.dto.HumanDTO;
 import guldilin.entity.Human;
-import guldilin.errors.EntryNotFound;
 import guldilin.repository.implementation.CrudRepositoryImpl;
 import lombok.SneakyThrows;
 
-import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
 
 @WebServlet("/api/human/*")
 public class HumanController extends HttpServlet {
@@ -41,8 +38,9 @@ public class HumanController extends HttpServlet {
         crudController.doGet(request, response);
     }
 
+    @SneakyThrows
     @Override
-    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
+    protected void doPost(HttpServletRequest request, HttpServletResponse response) {
         crudController.doPost(request, response);
     }
 
@@ -52,12 +50,9 @@ public class HumanController extends HttpServlet {
         crudController.doPut(request, response);
     }
 
+    @SneakyThrows
     @Override
-    protected void doDelete(HttpServletRequest request, HttpServletResponse response) throws ServletException {
-        try {
-            crudController.doDelete(request);
-        } catch (EntryNotFound entryNotFound) {
-            throw new ServletException(entryNotFound);
-        }
+    protected void doDelete(HttpServletRequest request, HttpServletResponse response) {
+        crudController.doDelete(request);
     }
 }

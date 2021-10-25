@@ -4,7 +4,7 @@ package guldilin.filter;
 import guldilin.errors.UnsupportedContentType;
 import guldilin.errors.UnsupportedMethod;
 import guldilin.errors.ValidationException;
-import guldilin.errors.ValidationMessages;
+import guldilin.errors.ErrorMessage;
 import lombok.SneakyThrows;
 
 import javax.servlet.*;
@@ -41,14 +41,17 @@ public class CrudFilter implements Filter {
             throw new UnsupportedMethod();
         }
 
+        if (method.equals("post") && request.getPathInfo() != null) {
+            throw new UnsupportedMethod();
+        }
+
         if (Arrays.asList("get", "delete", "put").contains(method) && request.getPathInfo() != null) {
             try {
                 Integer id = Integer.parseInt(request.getPathInfo().replaceAll("^/", ""));
                 request.setAttribute("id", id);
             } catch (NumberFormatException e) {
                 HashMap<String, String> errorsMap = new HashMap<>();
-                errorsMap.put("id", ValidationMessages.IS_INTEGER);
-                System.out.println("Filter Validation Exception ID");
+                errorsMap.put("id", ErrorMessage.IS_INTEGER);
                 throw new ValidationException(errorsMap);
             }
         }

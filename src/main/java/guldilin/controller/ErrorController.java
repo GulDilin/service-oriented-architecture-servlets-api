@@ -1,11 +1,13 @@
 package guldilin.controller;
 
 import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
+import com.google.gson.JsonSyntaxException;
 import guldilin.dto.ErrorDTO;
 import guldilin.dto.ValidationErrorDTO;
 import guldilin.errors.*;
+import guldilin.utils.GsonFactoryBuilder;
 
+import javax.persistence.PersistenceException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -17,87 +19,107 @@ import java.util.Map;
 public class ErrorController extends HttpServlet {
 
     private final Gson gson;
-    private final Map<String, Integer> errosMap;
+    private final Map<String, ErrorCode> errosMap;
+    private final Map<String, Integer> statusesMap;
 
     public ErrorController() {
-        gson = new GsonBuilder().serializeNulls().setDateFormat("yyyy-MM-dd HH:mm:ss").create();
-        errosMap = new HashMap<>();
+        this.gson = GsonFactoryBuilder.getGson();
+        this.errosMap = ErrorCodesFactory.getErrorCodesMap();
+        this.statusesMap = new HashMap<>();
 
-        errosMap.put(UnsupportedMethod.class.getName(), HttpServletResponse.SC_BAD_REQUEST);
-        errosMap.put(UnsupportedContentType.class.getName(), HttpServletResponse.SC_BAD_REQUEST);
-        errosMap.put(EntryNotFound.class.getName(), HttpServletResponse.SC_NOT_FOUND);
-        errosMap.put(ResourceNotFound.class.getName(), HttpServletResponse.SC_BAD_REQUEST);
-        errosMap.put(FilterTypeNotFound.class.getName(), HttpServletResponse.SC_BAD_REQUEST);
-        errosMap.put(FilterTypeNotSupported.class.getName(), HttpServletResponse.SC_BAD_REQUEST);
-        errosMap.put(UnknownFilterType.class.getName(), HttpServletResponse.SC_BAD_REQUEST);
-        errosMap.put(javax.persistence.NoResultException.class.getName(), HttpServletResponse.SC_BAD_REQUEST);
+        this.statusesMap.put(UnsupportedMethod.class.getName(), HttpServletResponse.SC_BAD_REQUEST);
+        this.statusesMap.put(UnsupportedContentType.class.getName(), HttpServletResponse.SC_BAD_REQUEST);
+        this.statusesMap.put(EntryNotFound.class.getName(), HttpServletResponse.SC_NOT_FOUND);
+        this.statusesMap.put(ResourceNotFound.class.getName(), HttpServletResponse.SC_BAD_REQUEST);
+        this.statusesMap.put(FilterTypeNotFound.class.getName(), HttpServletResponse.SC_BAD_REQUEST);
+        this.statusesMap.put(FilterTypeNotSupported.class.getName(), HttpServletResponse.SC_BAD_REQUEST);
+        this.statusesMap.put(UnknownFilterType.class.getName(), HttpServletResponse.SC_BAD_REQUEST);
+        this.statusesMap.put(javax.persistence.NoResultException.class.getName(), HttpServletResponse.SC_BAD_REQUEST);
+        this.statusesMap.put(NumberFormatException.class.getName(), HttpServletResponse.SC_BAD_REQUEST);
+
+
     }
 
-    protected void doValidationError(HttpServletResponse response, Throwable throwable)
-            throws IOException {
-        System.out.println("Catch validation Exception");
+    protected Object handleValidationError(HttpServletResponse response, Throwable throwable) {
         ValidationException validationException = (ValidationException) throwable;
-        ValidationErrorDTO errorDTO = ValidationErrorDTO.builder()
-                .error(ValidationException.class.getName())
+        response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+        return ValidationErrorDTO.builder()
+                .error(ErrorCode.VALIDATION_ERROR.name())
                 .message(validationException.getFieldsErrors())
                 .build();
-        response.setContentType("application/json");
-        response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-        response.getWriter().write(gson.toJson(errorDTO));
     }
 
-    protected void doConstraintViolationException(HttpServletResponse response, Throwable throwable)
-            throws IOException {
-        System.out.println("Catch validation Exception");
+    protected Object handleConstraintViolationException(HttpServletResponse response, Throwable throwable) {
         ConstraintViolationException validationError = (ConstraintViolationException) throwable;
         Map<String, String> validationErrors = new HashMap<>();
         validationError.getConstraintViolations().forEach(
                 c -> validationErrors.put(c.getPropertyPath().toString(), c.getMessage()));
-        ValidationErrorDTO errorDTO = ValidationErrorDTO.builder()
-                .error(ConstraintViolationException.class.getName())
+        response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+        return ValidationErrorDTO.builder()
+                .error(ErrorCode.VALIDATION_ERROR.name())
                 .message(validationErrors)
                 .build();
-        response.setContentType("application/json");
-        response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-        response.getWriter().write(gson.toJson(errorDTO));
     }
 
-    protected void doDefaultError(HttpServletRequest request, HttpServletResponse response,
-                                  Throwable throwable, String errorName)
-            throws IOException {
+    protected Object handleDefaultError(HttpServletRequest request, HttpServletResponse response,
+                                  Throwable throwable, String errorName) {
         Integer statusCode = (Integer) request.getAttribute("javax.servlet.error.status_code");
+        ErrorCode errorCode = ErrorCode.INTERNAL_SERVER_ERROR;
 
-        if (errosMap.containsKey(errorName)) {
-            statusCode = errosMap.get(errorName);
-        }
-        ErrorDTO errorDTO = ErrorDTO.builder()
-                .error(errorName)
+        if (this.statusesMap.containsKey(errorName)) statusCode = this.statusesMap.get(errorName);
+        if (this.errosMap.containsKey(errorName)) errorCode = this.errosMap.get(errorName);
+        response.setStatus(statusCode);
+        return ErrorDTO.builder()
+                .error(errorCode.name())
                 .message(throwable.getMessage())
                 .build();
-        response.setContentType("application/json");
-        response.setStatus(statusCode);
-        response.getWriter().write(gson.toJson(errorDTO));
     }
 
+    protected Object handlePersistenceException(HttpServletRequest request, HttpServletResponse response,
+                                  Throwable throwable)
+            throws IOException {
+        PersistenceException persistenceException = (PersistenceException) throwable;
+        return handleException(request, response, persistenceException.getCause());
+    }
+
+    protected Object handleJsonException(HttpServletRequest request, HttpServletResponse response,
+                                                Throwable throwable) {
+        throwable.printStackTrace();
+        JsonSyntaxException jsonSyntaxException = (JsonSyntaxException) throwable;
+        response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+        ErrorCode code = ErrorCode.JSON_SYNTAX_ERROR;
+        String cause = jsonSyntaxException.getCause().getClass().getName();
+        if (this.errosMap.containsKey(cause)) code = errosMap.get(cause);
+        return ErrorDTO.builder()
+                .error(code.name())
+                .message(jsonSyntaxException.getCause().getMessage())
+                .build();
+    }
+
+
+    protected Object handleException(HttpServletRequest request, HttpServletResponse response,
+                                          Throwable throwable) throws IOException {
+        String errorName = throwable.getClass().getName();
+        switch (errorName) {
+            case "guldilin.errors.ValidationException":
+                return handleValidationError(response, throwable);
+            case "javax.validation.ConstraintViolationException":
+                return handleConstraintViolationException(response, throwable);
+            case "javax.persistence.PersistenceException":
+                return handlePersistenceException(request, response, throwable);
+            case "com.google.gson.JsonSyntaxException":
+                return handleJsonException(request, response, throwable);
+            default:
+                return handleDefaultError(request, response, throwable, errorName);
+        }
+    }
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
         Throwable throwable = (Throwable) request.getAttribute("javax.servlet.error.exception");
-        String errorName = throwable.getClass().getName();
-
-        switch (errorName) {
-            case "guldilin.errors.ValidationException":
-                doValidationError(response, throwable);
-                break;
-            case "javax.validation.ConstraintViolationException":
-                doConstraintViolationException(response, throwable);
-                break;
-            default:
-                doDefaultError(request, response, throwable, errorName);
-                break;
-        }
-
-
+        Object dto = handleException(request, response, throwable);
+        response.setContentType("application/json");
+        response.getWriter().write(gson.toJson(dto));
     }
 
     @Override

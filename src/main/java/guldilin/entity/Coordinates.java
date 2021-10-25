@@ -1,7 +1,7 @@
 package guldilin.entity;
 
 import guldilin.dto.CoordinatesDTO;
-import guldilin.errors.ValidationMessages;
+import guldilin.errors.ErrorMessage;
 import guldilin.utils.FilterActionType;
 import guldilin.utils.FilterableField;
 import lombok.*;
@@ -36,7 +36,7 @@ public class Coordinates extends AbstractEntity {
     private Long x;
 
     @Column(name = "y")
-    @Min(value = -667, message = ValidationMessages.MIN_N667)
+    @Min(value = -667, message = ErrorMessage.MIN_N667)
     private Integer y;
 
     @Override

@@ -1,7 +1,7 @@
 package guldilin.entity;
 
 import guldilin.dto.CityDTO;
-import guldilin.errors.ValidationMessages;
+import guldilin.errors.ErrorMessage;
 import guldilin.utils.FilterActionType;
 import guldilin.utils.FilterableField;
 import lombok.*;
@@ -13,7 +13,10 @@ import javax.validation.constraints.Min;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import java.sql.Timestamp;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 
 @EqualsAndHashCode(callSuper = true)
@@ -25,9 +28,25 @@ import java.util.List;
 @ToString
 public class City extends AbstractEntity {
     public static List<FilterableField<?>> getFilterableFields() {
+        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
         return Arrays.asList(
                 new FilterableField<>(Long.class, FilterActionType.COMPARABLE, "id", Long::parseLong),
-                new FilterableField<>(String.class, FilterActionType.COMPARABLE, "name", s -> s)
+                new FilterableField<>(String.class, FilterActionType.CONTAINS, "name", s -> s),
+                new FilterableField<>(Date.class, FilterActionType.COMPARABLE, "creationDate",
+                        s -> {
+                            try {
+                                return formatter.parse(s);
+                            } catch (ParseException e) {
+                                return null;
+                            }
+                        }),
+                new FilterableField<>(Float.class, FilterActionType.COMPARABLE, "metersAboveSeaLevel", Float::parseFloat),
+                new FilterableField<>(Integer.class, FilterActionType.COMPARABLE, "area", Integer::parseInt),
+                new FilterableField<>(Integer.class, FilterActionType.COMPARABLE, "population", Integer::parseInt),
+                new FilterableField<>(Integer.class, FilterActionType.COMPARABLE, "populationDensity", Integer::parseInt),
+                new FilterableField<>(Integer.class, FilterActionType.COMPARABLE, "carCode", Integer::parseInt),
+                new FilterableField<>(Integer.class, FilterActionType.COMPARABLE, "coordinates", Integer::parseInt),
+                new FilterableField<>(Integer.class, FilterActionType.COMPARABLE, "governor", Integer::parseInt)
         );
     }
 
@@ -37,7 +56,7 @@ public class City extends AbstractEntity {
     private Integer id;
 
     @Column(name = "name", nullable = false)
-    @NotBlank(message = ValidationMessages.NOT_BLANK)
+    @NotBlank(message = ErrorMessage.NOT_BLANK)
     private String name;
 
     @ManyToOne
@@ -50,29 +69,29 @@ public class City extends AbstractEntity {
 
 
     @Column(name = "area", nullable = false)
-    @NotNull(message = ValidationMessages.NOT_NULL)
-    @Min(value = 0, message = ValidationMessages.MIN_0)
+    @NotNull(message = ErrorMessage.NOT_NULL)
+    @Min(value = 0, message = ErrorMessage.MIN_0)
     private Integer area;
 
     @Column(name = "population", nullable = false)
-    @NotNull(message = ValidationMessages.NOT_NULL)
-    @Min(value = 0, message = ValidationMessages.MIN_0)
+    @NotNull(message = ErrorMessage.NOT_NULL)
+    @Min(value = 0, message = ErrorMessage.MIN_0)
     private Integer population;
 
     @Column(name = "meters_above_sea_level")
     private Float metersAboveSeaLevel;
 
     @Column(name = "population_density")
-    @Min(value = 0, message = ValidationMessages.MIN_0)
+    @Min(value = 0, message = ErrorMessage.MIN_0)
     private Integer populationDensity;
 
     @Column(name = "car_code")
-    @Min(value = 0, message = ValidationMessages.MIN_0)
-    @Max(value = 1000, message = ValidationMessages.MAX_1000)
+    @Min(value = 0, message = ErrorMessage.MIN_0)
+    @Max(value = 1000, message = ErrorMessage.MAX_1000)
     private Integer carCode;
 
     @Column(name = "climate", nullable = false)
-    @NotNull(message = ValidationMessages.NOT_NULL)
+    @NotNull(message = ErrorMessage.NOT_NULL)
     @Enumerated(EnumType.STRING)
     private Climate climate;
 

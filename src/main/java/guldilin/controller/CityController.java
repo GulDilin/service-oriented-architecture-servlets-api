@@ -4,8 +4,7 @@ import guldilin.dto.CityDTO;
 import guldilin.entity.City;
 import guldilin.entity.Coordinates;
 import guldilin.entity.Human;
-import guldilin.errors.ValidationMessages;
-import guldilin.errors.EntryNotFound;
+import guldilin.errors.ErrorMessage;
 import guldilin.errors.ValidationException;
 import guldilin.repository.implementation.CrudRepositoryImpl;
 import lombok.SneakyThrows;
@@ -45,7 +44,7 @@ public class CityController extends HttpServlet {
                 .coordinates(Objects.isNull(dto.getCoordinates()) ? null : repositoryCoordinates
                         .findById(dto.getCoordinates()).orElseThrow(() -> {
                             HashMap<String, String> errorsMap = new HashMap<>();
-                            errorsMap.put("coordinates", ValidationMessages.NOT_FOUND);
+                            errorsMap.put("coordinates", ErrorMessage.NOT_FOUND);
                             return new ValidationException(errorsMap);
                         }))
                 .area(dto.getArea())
@@ -57,7 +56,7 @@ public class CityController extends HttpServlet {
                 .governor(Objects.isNull(dto.getGovernor()) ? null : repositoryHuman
                         .findById(dto.getGovernor()).orElseThrow(() -> {
                             HashMap<String, String> errorsMap = new HashMap<>();
-                            errorsMap.put("governor", ValidationMessages.NOT_FOUND);
+                            errorsMap.put("governor", ErrorMessage.NOT_FOUND);
                             return new ValidationException(errorsMap);
                         }))
                 .build();
@@ -69,6 +68,7 @@ public class CityController extends HttpServlet {
         crudController.doGet(request, response);
     }
 
+    @SneakyThrows
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
         crudController.doPost(request, response);
@@ -80,12 +80,9 @@ public class CityController extends HttpServlet {
         crudController.doPut(request, response);
     }
 
+    @SneakyThrows
     @Override
     protected void doDelete(HttpServletRequest request, HttpServletResponse response) throws ServletException {
-        try {
-            crudController.doDelete(request);
-        } catch (EntryNotFound entryNotFound) {
-            throw new ServletException(entryNotFound);
-        }
+        crudController.doDelete(request);
     }
 }

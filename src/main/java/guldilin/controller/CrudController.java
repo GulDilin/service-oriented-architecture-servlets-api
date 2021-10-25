@@ -1,7 +1,6 @@
 package guldilin.controller;
 
 import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import guldilin.dto.AbstractDTO;
 import guldilin.dto.EntityListDTO;
 import guldilin.entity.AbstractEntity;
@@ -12,6 +11,7 @@ import guldilin.repository.interfaces.CrudRepository;
 import guldilin.utils.FilterAction;
 import guldilin.utils.FilterActionParser;
 import guldilin.utils.FilterableField;
+import guldilin.utils.GsonFactoryBuilder;
 import lombok.Data;
 import org.hibernate.Session;
 
@@ -46,7 +46,7 @@ public class CrudController<T extends AbstractEntity, D extends AbstractDTO> {
         this.repository = repository;
         this.getFields = getFields;
         this.mapToEntity = mapToEntity;
-        this.gson = new GsonBuilder().serializeNulls().setDateFormat("yyyy-MM-dd HH:mm:ss").create();
+        this.gson = GsonFactoryBuilder.getGson();
     }
 
     void doGetById(Integer id, HttpServletResponse response) throws IOException {
