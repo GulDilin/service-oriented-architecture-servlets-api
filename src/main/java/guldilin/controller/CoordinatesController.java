@@ -16,11 +16,10 @@ import java.io.IOException;
 
 @WebServlet("/api/coordinates/*")
 public class CoordinatesController extends HttpServlet {
-    private CrudRepositoryImpl<Coordinates> repository;
-    private CrudController<Coordinates, CoordinatesDTO> crudController;
+    private final CrudController<Coordinates, CoordinatesDTO> crudController;
 
     public CoordinatesController() {
-        repository = new CrudRepositoryImpl<>(Coordinates.class);
+        CrudRepositoryImpl<Coordinates> repository = new CrudRepositoryImpl<>(Coordinates.class);
         crudController = new CrudController<>(
                 Coordinates.class,
                 CoordinatesDTO.class,
@@ -35,27 +34,27 @@ public class CoordinatesController extends HttpServlet {
                 .x(dto.getX())
                 .y(dto.getY())
                 .build();
-    };
+    }
 
     @SneakyThrows
     @Override
-    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+    protected void doGet(HttpServletRequest request, HttpServletResponse response) {
         crudController.doGet(request, response);
     }
 
     @Override
-    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
         crudController.doPost(request, response);
     }
 
     @SneakyThrows
     @Override
-    protected void doPut(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+    protected void doPut(HttpServletRequest request, HttpServletResponse response) {
         crudController.doPut(request, response);
     }
 
     @Override
-    protected void doDelete(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+    protected void doDelete(HttpServletRequest request, HttpServletResponse response) throws ServletException {
         try {
             crudController.doDelete(request);
         } catch (EntryNotFound entryNotFound) {

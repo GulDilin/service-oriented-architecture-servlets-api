@@ -12,7 +12,6 @@ import guldilin.repository.interfaces.CrudRepository;
 import guldilin.utils.FilterAction;
 import guldilin.utils.FilterActionParser;
 import guldilin.utils.FilterableField;
-import lombok.Builder;
 import lombok.Data;
 import org.hibernate.Session;
 
@@ -33,14 +32,14 @@ public class CrudController<T extends AbstractEntity, D extends AbstractDTO> {
     private Class<D> dtoClass;
     private CrudRepository<T> repository;
     private Gson gson;
-    private Supplier<List<FilterableField>> getFields;
+    private Supplier<List<FilterableField<?>>> getFields;
     private Function<D, T> mapToEntity;
 
     public CrudController(
             Class<T> entityClass,
             Class<D> dtoClass,
             CrudRepository<T> repository,
-            Supplier<List<FilterableField>> getFields,
+            Supplier<List<FilterableField<?>>> getFields,
             Function<D, T> mapToEntity) {
         this.entityClass = entityClass;
         this.dtoClass = dtoClass;
@@ -57,8 +56,8 @@ public class CrudController<T extends AbstractEntity, D extends AbstractDTO> {
                         .mapToDTO()));
     }
 
-    private Predicate parseFilterAction(FilterAction action, CriteriaBuilder cb, Root root) throws FilterTypeNotFound {
-        FilterableField field = action.getFilterableField();
+    private Predicate parseFilterAction(FilterAction action, CriteriaBuilder cb, Root<?> root) throws FilterTypeNotFound {
+        FilterableField<?> field = action.getFilterableField();
         String fieldName = field.getName();
         System.out.println("Filter field " + fieldName + " by value " + action.getValue() + " mode " + action.getFilterType());
         switch (action.getFilterType()) {
@@ -80,7 +79,7 @@ public class CrudController<T extends AbstractEntity, D extends AbstractDTO> {
         throw new FilterTypeNotFound();
     }
 
-    void applyOrders(String[] orderings, CriteriaBuilder cb, CriteriaQuery criteria, Root root) {
+    void applyOrders(String[] orderings, CriteriaBuilder cb, CriteriaQuery<?> criteria, Root<?> root) {
         HashMap<String, Function<Expression<?>, Order>> orderingMap = new HashMap<>();
         Arrays.stream(orderings)
                 .map(String::trim)
@@ -94,18 +93,18 @@ public class CrudController<T extends AbstractEntity, D extends AbstractDTO> {
         criteria.orderBy(orders);
     }
 
-    void applyFilters(HttpServletRequest request, CriteriaBuilder cb, CriteriaQuery criteria, Root root)
+    void applyFilters(HttpServletRequest request, CriteriaBuilder cb, CriteriaQuery<?> criteria, Root<?> root)
             throws FilterTypeNotFound, FilterTypeNotSupported {
-        List<FilterableField> fields = getFields.get()
+        List<FilterableField<?>> fields = getFields.get()
                 .stream()
                 .filter(e -> request.getParameter(e.getName()) != null)
                 .collect(Collectors.toList());
         List<Predicate> predicates = new ArrayList<>();
-        for (FilterableField field : fields) {
+        for (FilterableField<?> field : fields) {
             FilterAction action = FilterActionParser.parse(request.getParameter(field.getName()), field);
             predicates.add(parseFilterAction(action, cb, root));
         }
-        criteria.where(cb.and(predicates.toArray(new Predicate[predicates.size()])));
+        criteria.where(cb.and(predicates.toArray(new Predicate[0])));
     }
 
     private Long getTotalCount(HttpServletRequest request) throws FilterTypeNotFound, FilterTypeNotSupported {

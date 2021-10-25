@@ -6,7 +6,6 @@ import guldilin.dto.ErrorDTO;
 import guldilin.dto.ValidationErrorDTO;
 import guldilin.errors.*;
 
-import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -17,8 +16,8 @@ import java.util.Map;
 
 public class ErrorController extends HttpServlet {
 
-    private Gson gson;
-    private Map<String, Integer> errosMap;
+    private final Gson gson;
+    private final Map<String, Integer> errosMap;
 
     public ErrorController() {
         gson = new GsonBuilder().serializeNulls().setDateFormat("yyyy-MM-dd HH:mm:ss").create();
@@ -34,7 +33,7 @@ public class ErrorController extends HttpServlet {
         errosMap.put(javax.persistence.NoResultException.class.getName(), HttpServletResponse.SC_BAD_REQUEST);
     }
 
-    protected void doValidationError(HttpServletRequest request, HttpServletResponse response, Throwable throwable)
+    protected void doValidationError(HttpServletResponse response, Throwable throwable)
             throws IOException {
         System.out.println("Catch validation Exception");
         ValidationException validationException = (ValidationException) throwable;
@@ -47,7 +46,7 @@ public class ErrorController extends HttpServlet {
         response.getWriter().write(gson.toJson(errorDTO));
     }
 
-    protected void doConstraintViolationException(HttpServletRequest request, HttpServletResponse response, Throwable throwable)
+    protected void doConstraintViolationException(HttpServletResponse response, Throwable throwable)
             throws IOException {
         System.out.println("Catch validation Exception");
         ConstraintViolationException validationError = (ConstraintViolationException) throwable;
@@ -82,16 +81,16 @@ public class ErrorController extends HttpServlet {
 
 
     @Override
-    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
         Throwable throwable = (Throwable) request.getAttribute("javax.servlet.error.exception");
         String errorName = throwable.getClass().getName();
 
         switch (errorName) {
             case "guldilin.errors.ValidationException":
-                doValidationError(request, response, throwable);
+                doValidationError(response, throwable);
                 break;
             case "javax.validation.ConstraintViolationException":
-                doConstraintViolationException(request, response, throwable);
+                doConstraintViolationException(response, throwable);
                 break;
             default:
                 doDefaultError(request, response, throwable, errorName);
@@ -102,17 +101,17 @@ public class ErrorController extends HttpServlet {
     }
 
     @Override
-    protected void doDelete(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+    protected void doDelete(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         doGet(req, resp);
     }
 
     @Override
-    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         doGet(req, resp);
     }
 
     @Override
-    protected void doPut(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+    protected void doPut(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         doGet(req, resp);
     }
 }

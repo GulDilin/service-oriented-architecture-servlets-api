@@ -1,11 +1,9 @@
 package guldilin.dto;
 
-import guldilin.entity.AbstractEntity;
 import guldilin.entity.City;
 import guldilin.entity.Climate;
 import lombok.*;
 
-import java.time.LocalDateTime;
 import java.util.Date;
 
 @EqualsAndHashCode(callSuper = true)

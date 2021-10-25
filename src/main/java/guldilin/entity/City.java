@@ -24,7 +24,7 @@ import java.util.List;
 @Builder
 @ToString
 public class City extends AbstractEntity {
-    public static List<FilterableField> getFilterableFields() {
+    public static List<FilterableField<?>> getFilterableFields() {
         return Arrays.asList(
                 new FilterableField<>(Long.class, FilterActionType.COMPARABLE, "id", Long::parseLong),
                 new FilterableField<>(String.class, FilterActionType.COMPARABLE, "name", s -> s)

@@ -8,7 +8,7 @@ import java.util.List;
 
 @Data
 public abstract class AbstractEntity implements Mappable, Filterable {
-    public static List<FilterableField> getFilterableFields() {
+    public static List<FilterableField<?>> getFilterableFields() {
         return Collections.emptyList();
     }
 
