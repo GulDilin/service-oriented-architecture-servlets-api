@@ -3,12 +3,14 @@ package guldilin.controller;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import guldilin.dto.ErrorDTO;
+import guldilin.dto.ValidationErrorDTO;
 import guldilin.errors.*;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.validation.ConstraintViolationException;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
@@ -32,15 +34,43 @@ public class ErrorController extends HttpServlet {
         errosMap.put(javax.persistence.NoResultException.class.getName(), HttpServletResponse.SC_BAD_REQUEST);
     }
 
-    @Override
-    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        Throwable throwable = (Throwable) request.getAttribute("javax.servlet.error.exception");
-        Integer statusCode = (Integer)  request.getAttribute("javax.servlet.error.status_code");
-        String errorName = throwable.getClass().getName();
+    protected void doValidationError(HttpServletRequest request, HttpServletResponse response, Throwable throwable)
+            throws IOException {
+        System.out.println("Catch validation Exception");
+        ValidationException validationException = (ValidationException) throwable;
+        ValidationErrorDTO errorDTO = ValidationErrorDTO.builder()
+                .error(ValidationException.class.getName())
+                .message(validationException.getFieldsErrors())
+                .build();
+        response.setContentType("application/json");
+        response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+        response.getWriter().write(gson.toJson(errorDTO));
+    }
+
+    protected void doConstraintViolationException(HttpServletRequest request, HttpServletResponse response, Throwable throwable)
+            throws IOException {
+        System.out.println("Catch validation Exception");
+        ConstraintViolationException validationError = (ConstraintViolationException) throwable;
+        Map<String, String> validationErrors = new HashMap<>();
+        validationError.getConstraintViolations().forEach(
+                c -> validationErrors.put(c.getPropertyPath().toString(), c.getMessage()));
+        ValidationErrorDTO errorDTO = ValidationErrorDTO.builder()
+                .error(ConstraintViolationException.class.getName())
+                .message(validationErrors)
+                .build();
+        response.setContentType("application/json");
+        response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+        response.getWriter().write(gson.toJson(errorDTO));
+    }
+
+    protected void doDefaultError(HttpServletRequest request, HttpServletResponse response,
+                                  Throwable throwable, String errorName)
+            throws IOException {
+        Integer statusCode = (Integer) request.getAttribute("javax.servlet.error.status_code");
+
         if (errosMap.containsKey(errorName)) {
             statusCode = errosMap.get(errorName);
         }
-
         ErrorDTO errorDTO = ErrorDTO.builder()
                 .error(errorName)
                 .message(throwable.getMessage())
@@ -48,6 +78,27 @@ public class ErrorController extends HttpServlet {
         response.setContentType("application/json");
         response.setStatus(statusCode);
         response.getWriter().write(gson.toJson(errorDTO));
+    }
+
+
+    @Override
+    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        Throwable throwable = (Throwable) request.getAttribute("javax.servlet.error.exception");
+        String errorName = throwable.getClass().getName();
+
+        switch (errorName) {
+            case "guldilin.errors.ValidationException":
+                doValidationError(request, response, throwable);
+                break;
+            case "javax.validation.ConstraintViolationException":
+                doConstraintViolationException(request, response, throwable);
+                break;
+            default:
+                doDefaultError(request, response, throwable, errorName);
+                break;
+        }
+
+
     }
 
     @Override

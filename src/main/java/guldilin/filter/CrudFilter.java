@@ -1,10 +1,10 @@
 package guldilin.filter;
 
 
-import com.google.gson.Gson;
-import guldilin.errors.ResourceNotFound;
+import guldilin.entity.ValidationMessages;
 import guldilin.errors.UnsupportedContentType;
 import guldilin.errors.UnsupportedMethod;
+import guldilin.errors.ValidationException;
 import lombok.SneakyThrows;
 
 import javax.servlet.*;
@@ -13,15 +13,15 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Locale;
 
 @WebFilter({"/api/coordinates/*", "/api/city/*", "/api/human/*"})
 public class CrudFilter implements Filter {
-    private Gson gson;
 
     @Override
     public void init(FilterConfig filterConfig) throws ServletException {
-        this.gson = new Gson();
+
     }
 
     @SneakyThrows
@@ -34,7 +34,6 @@ public class CrudFilter implements Filter {
         HttpServletResponse response = (HttpServletResponse) servletResponse;
         String method = request.getMethod().toLowerCase(Locale.ROOT);
         String contendType = "application/json";
-        System.out.println(request.getContentType());
         if (Arrays.asList("post", "put").contains(method) &&
                 (request.getContentType() == null ||
                 !request.getContentType().equals(contendType))) throw new UnsupportedContentType();
@@ -49,7 +48,10 @@ public class CrudFilter implements Filter {
                 Integer id = Integer.parseInt(request.getPathInfo().replaceAll("^/", ""));
                 request.setAttribute("id", id);
             } catch (NumberFormatException e) {
-                throw new ResourceNotFound();
+                HashMap<String, String> errorsMap = new HashMap<>();
+                errorsMap.put("id", ValidationMessages.IS_INTEGER);
+                System.out.println("Filter Validation Exception ID");
+                throw new ValidationException(errorsMap);
             }
         }
         response.setContentType(contendType);

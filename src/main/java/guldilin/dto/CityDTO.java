@@ -13,9 +13,9 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @Builder
 public class CityDTO extends AbstractDTO {
-    private Long id;
+    private Integer id;
     private String name;
-    private Long coordinates;
+    private Integer coordinates;
     private LocalDateTime creationDate;
     private Climate climate;
     private Integer area;
@@ -23,10 +23,10 @@ public class CityDTO extends AbstractDTO {
     private Float metersAboveSeaLevel;
     private Integer populationDensity;
     private Integer carCode;
-    private Long governor;
+    private Integer governor;
 
     public CityDTO(City city) {
-        this.id = Long.valueOf(city.getId());
+        this.id = city.getId();
         this.name = city.getName();
         this.creationDate = city.getCreationDate().toLocalDateTime();
         this.climate = city.getClimate();
@@ -37,10 +37,10 @@ public class CityDTO extends AbstractDTO {
         this.carCode = city.getCarCode();
 
         if (city.getCoordinates() != null) {
-            this.coordinates = Long.valueOf(city.getCoordinates().getId());
+            this.coordinates = city.getCoordinates().getId();
         }
         if (city.getGovernor() != null) {
-            this.governor = Long.valueOf(city.getGovernor().getId());
+            this.governor = city.getGovernor().getId();
         }
     }
 }

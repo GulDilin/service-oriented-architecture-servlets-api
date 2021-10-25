@@ -2,8 +2,8 @@ package guldilin.controller;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import guldilin.dto.CoordinatesDTO;
-import guldilin.entity.Coordinates;
+import guldilin.dto.HumanDTO;
+import guldilin.entity.Human;
 import guldilin.errors.EntryNotFound;
 import guldilin.repository.implementation.CrudRepositoryImpl;
 import lombok.SneakyThrows;
@@ -15,29 +15,28 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
-@WebServlet("/api/coordinates/*")
-public class CoordinatesController extends HttpServlet {
-    private CrudRepositoryImpl<Coordinates> repository;
-    private CrudController<Coordinates, CoordinatesDTO> crudController;
+@WebServlet("/api/human/*")
+public class HumanController extends HttpServlet {
+    private CrudRepositoryImpl<Human> repository;
+    private CrudController<Human, HumanDTO> crudController;
     private Gson gson;
 
-    public CoordinatesController() {
-        repository = new CrudRepositoryImpl<>(Coordinates.class);
+    public HumanController() {
+        repository = new CrudRepositoryImpl<>(Human.class);
         gson = new GsonBuilder().serializeNulls().create();
         crudController = new CrudController<>(
-                Coordinates.class,
-                CoordinatesDTO.class,
+                Human.class,
+                HumanDTO.class,
                 repository,
                 gson,
-                Coordinates::getFilterableFields,
+                Human::getFilterableFields,
                 this::mapToEntity);
     }
 
-    private Coordinates mapToEntity(CoordinatesDTO dto) {
-        return Coordinates.builder()
+    private Human mapToEntity(HumanDTO dto) {
+        return Human.builder()
                 .id(dto.getId())
-                .x(dto.getX())
-                .y(dto.getY())
+                .birthday(dto.getBirthday())
                 .build();
     };
 
