@@ -3,7 +3,7 @@ package guldilin.dto;
 import guldilin.entity.Human;
 import lombok.*;
 
-import java.time.LocalDate;
+import java.util.Date;
 
 @EqualsAndHashCode(callSuper = true)
 @Data
@@ -12,7 +12,7 @@ import java.time.LocalDate;
 @AllArgsConstructor
 public class HumanDTO extends AbstractDTO {
     private Integer id;
-    private LocalDate birthday;
+    private Date birthday;
 
     public HumanDTO(Human human) {
         this.id = human.getId();

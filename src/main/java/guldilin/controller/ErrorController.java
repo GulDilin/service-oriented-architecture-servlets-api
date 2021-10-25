@@ -21,7 +21,7 @@ public class ErrorController extends HttpServlet {
     private Map<String, Integer> errosMap;
 
     public ErrorController() {
-        gson = new GsonBuilder().serializeNulls().create();
+        gson = new GsonBuilder().serializeNulls().setDateFormat("yyyy-MM-dd HH:mm:ss").create();
         errosMap = new HashMap<>();
 
         errosMap.put(UnsupportedMethod.class.getName(), HttpServletResponse.SC_BAD_REQUEST);

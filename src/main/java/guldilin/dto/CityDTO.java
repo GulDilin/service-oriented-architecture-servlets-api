@@ -6,6 +6,7 @@ import guldilin.entity.Climate;
 import lombok.*;
 
 import java.time.LocalDateTime;
+import java.util.Date;
 
 @EqualsAndHashCode(callSuper = true)
 @Data
@@ -16,7 +17,7 @@ public class CityDTO extends AbstractDTO {
     private Integer id;
     private String name;
     private Integer coordinates;
-    private LocalDateTime creationDate;
+    private Date creationDate;
     private Climate climate;
     private Integer area;
     private Integer population;
@@ -28,7 +29,7 @@ public class CityDTO extends AbstractDTO {
     public CityDTO(City city) {
         this.id = city.getId();
         this.name = city.getName();
-        this.creationDate = city.getCreationDate().toLocalDateTime();
+        this.creationDate = city.getCreationDate();
         this.climate = city.getClimate();
         this.area = city.getArea();
         this.population = city.getPopulation();

@@ -1,7 +1,6 @@
 package guldilin.controller;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
+
 import guldilin.dto.CoordinatesDTO;
 import guldilin.entity.Coordinates;
 import guldilin.errors.EntryNotFound;
@@ -19,16 +18,13 @@ import java.io.IOException;
 public class CoordinatesController extends HttpServlet {
     private CrudRepositoryImpl<Coordinates> repository;
     private CrudController<Coordinates, CoordinatesDTO> crudController;
-    private Gson gson;
 
     public CoordinatesController() {
         repository = new CrudRepositoryImpl<>(Coordinates.class);
-        gson = new GsonBuilder().serializeNulls().create();
         crudController = new CrudController<>(
                 Coordinates.class,
                 CoordinatesDTO.class,
                 repository,
-                gson,
                 Coordinates::getFilterableFields,
                 this::mapToEntity);
     }

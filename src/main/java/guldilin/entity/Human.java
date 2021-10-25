@@ -4,8 +4,7 @@ import guldilin.dto.HumanDTO;
 import lombok.*;
 
 import javax.persistence.*;
-import java.time.LocalDate;
-import java.util.List;
+import java.util.Date;
 
 @EqualsAndHashCode(callSuper = true)
 @Entity(name="human")
@@ -21,7 +20,7 @@ public class Human extends AbstractEntity {
     private Integer id;
 
     @Column(name = "birthday")
-    private LocalDate birthday;
+    private Date birthday;
 
     @Override
     public HumanDTO mapToDTO() {

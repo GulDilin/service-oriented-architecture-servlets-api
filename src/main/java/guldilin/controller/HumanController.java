@@ -1,7 +1,6 @@
 package guldilin.controller;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
+
 import guldilin.dto.HumanDTO;
 import guldilin.entity.Human;
 import guldilin.errors.EntryNotFound;
@@ -17,18 +16,14 @@ import java.io.IOException;
 
 @WebServlet("/api/human/*")
 public class HumanController extends HttpServlet {
-    private CrudRepositoryImpl<Human> repository;
-    private CrudController<Human, HumanDTO> crudController;
-    private Gson gson;
+    private final CrudController<Human, HumanDTO> crudController;
 
     public HumanController() {
-        repository = new CrudRepositoryImpl<>(Human.class);
-        gson = new GsonBuilder().serializeNulls().create();
+        CrudRepositoryImpl<Human> repository = new CrudRepositoryImpl<>(Human.class);
         crudController = new CrudController<>(
                 Human.class,
                 HumanDTO.class,
                 repository,
-                gson,
                 Human::getFilterableFields,
                 this::mapToEntity);
     }
@@ -38,27 +33,27 @@ public class HumanController extends HttpServlet {
                 .id(dto.getId())
                 .birthday(dto.getBirthday())
                 .build();
-    };
+    }
 
     @SneakyThrows
     @Override
-    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+    protected void doGet(HttpServletRequest request, HttpServletResponse response) {
         crudController.doGet(request, response);
     }
 
     @Override
-    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
         crudController.doPost(request, response);
     }
 
     @SneakyThrows
     @Override
-    protected void doPut(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+    protected void doPut(HttpServletRequest request, HttpServletResponse response) {
         crudController.doPut(request, response);
     }
 
     @Override
-    protected void doDelete(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+    protected void doDelete(HttpServletRequest request, HttpServletResponse response) throws ServletException {
         try {
             crudController.doDelete(request);
         } catch (EntryNotFound entryNotFound) {

@@ -1,7 +1,5 @@
 package guldilin.controller;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import guldilin.dto.CityDTO;
 import guldilin.entity.City;
 import guldilin.entity.Coordinates;
@@ -23,22 +21,18 @@ import java.util.Objects;
 
 @WebServlet("/api/city/*")
 public class CityController extends HttpServlet {
-    private CrudRepositoryImpl<City> repository;
-    private CrudRepositoryImpl<Human> repositoryHuman;
-    private CrudRepositoryImpl<Coordinates> repositoryCoordinates;
-    private CrudController<City, CityDTO> crudController;
-    private Gson gson;
+    private final CrudRepositoryImpl<Human> repositoryHuman;
+    private final CrudRepositoryImpl<Coordinates> repositoryCoordinates;
+    private final CrudController<City, CityDTO> crudController;
 
     public CityController() {
-        repository = new CrudRepositoryImpl<>(City.class);
+        CrudRepositoryImpl<City> repository = new CrudRepositoryImpl<>(City.class);
         repositoryHuman = new CrudRepositoryImpl<>(Human.class);
         repositoryCoordinates = new CrudRepositoryImpl<>(Coordinates.class);
-        gson = new GsonBuilder().serializeNulls().create();
         crudController = new CrudController<>(
                 City.class,
                 CityDTO.class,
                 repository,
-                gson,
                 City::getFilterableFields,
                 this::mapToEntity);
     }
@@ -69,27 +63,25 @@ public class CityController extends HttpServlet {
                 .build();
     }
 
-    ;
-
     @SneakyThrows
     @Override
-    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+    protected void doGet(HttpServletRequest request, HttpServletResponse response) {
         crudController.doGet(request, response);
     }
 
     @Override
-    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
         crudController.doPost(request, response);
     }
 
     @SneakyThrows
     @Override
-    protected void doPut(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+    protected void doPut(HttpServletRequest request, HttpServletResponse response) {
         crudController.doPut(request, response);
     }
 
     @Override
-    protected void doDelete(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+    protected void doDelete(HttpServletRequest request, HttpServletResponse response) throws ServletException {
         try {
             crudController.doDelete(request);
         } catch (EntryNotFound entryNotFound) {

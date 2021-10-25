@@ -1,6 +1,7 @@
 package guldilin.controller;
 
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import guldilin.dto.AbstractDTO;
 import guldilin.dto.EntityListDTO;
 import guldilin.entity.AbstractEntity;
@@ -11,7 +12,7 @@ import guldilin.repository.interfaces.CrudRepository;
 import guldilin.utils.FilterAction;
 import guldilin.utils.FilterActionParser;
 import guldilin.utils.FilterableField;
-import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import org.hibernate.Session;
 
@@ -27,7 +28,6 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 @Data
-@AllArgsConstructor
 public class CrudController<T extends AbstractEntity, D extends AbstractDTO> {
     private Class<T> entityClass;
     private Class<D> dtoClass;
@@ -35,6 +35,20 @@ public class CrudController<T extends AbstractEntity, D extends AbstractDTO> {
     private Gson gson;
     private Supplier<List<FilterableField>> getFields;
     private Function<D, T> mapToEntity;
+
+    public CrudController(
+            Class<T> entityClass,
+            Class<D> dtoClass,
+            CrudRepository<T> repository,
+            Supplier<List<FilterableField>> getFields,
+            Function<D, T> mapToEntity) {
+        this.entityClass = entityClass;
+        this.dtoClass = dtoClass;
+        this.repository = repository;
+        this.getFields = getFields;
+        this.mapToEntity = mapToEntity;
+        this.gson = new GsonBuilder().serializeNulls().setDateFormat("yyyy-MM-dd HH:mm:ss").create();
+    }
 
     void doGetById(Integer id, HttpServletResponse response) throws IOException {
         response.getWriter().write(gson.toJson(
@@ -55,13 +69,13 @@ public class CrudController<T extends AbstractEntity, D extends AbstractDTO> {
             case CONTAINS:
                 return cb.like(root.get(fieldName), "%" + field.getParser().apply(action.getValue()) + "%");
             case LESS_THAN:
-                return cb.lessThan(root.get(fieldName), (Comparable) field.getTClass().cast(field.getParser().apply(action.getValue())) );
+                return cb.lessThan(root.get(fieldName), (Comparable) field.getTClass().cast(field.getParser().apply(action.getValue())));
             case GREATER_THAN:
-                return cb.greaterThan(root.get(fieldName), (Comparable) field.getTClass().cast(field.getParser().apply(action.getValue())) );
+                return cb.greaterThan(root.get(fieldName), (Comparable) field.getTClass().cast(field.getParser().apply(action.getValue())));
             case LESS_THAN_OR_EQUALS:
-                return cb.lessThanOrEqualTo(root.get(fieldName), (Comparable) field.getTClass().cast(field.getParser().apply(action.getValue())) );
+                return cb.lessThanOrEqualTo(root.get(fieldName), (Comparable) field.getTClass().cast(field.getParser().apply(action.getValue())));
             case GREATER_THAN_OR_EQUALS:
-                return cb.greaterThanOrEqualTo(root.get(fieldName), (Comparable) field.getTClass().cast(field.getParser().apply(action.getValue())) );
+                return cb.greaterThanOrEqualTo(root.get(fieldName), (Comparable) field.getTClass().cast(field.getParser().apply(action.getValue())));
         }
         throw new FilterTypeNotFound();
     }
@@ -146,7 +160,7 @@ public class CrudController<T extends AbstractEntity, D extends AbstractDTO> {
         session.close();
     }
 
-    public D parseBodyDTO(HttpServletRequest request)  throws IOException {
+    public D parseBodyDTO(HttpServletRequest request) throws IOException {
         return gson.fromJson(request.getReader(), dtoClass);
     }
 
