@@ -1,4 +1,4 @@
-package guldilin.entity;
+package guldilin.errors;
 
 public class ValidationMessages {
     public static final String NOT_BLANK = "Cannot be blank";

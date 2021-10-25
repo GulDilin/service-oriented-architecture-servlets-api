@@ -1,6 +1,7 @@
 package guldilin.entity;
 
 import guldilin.dto.CityDTO;
+import guldilin.errors.ValidationMessages;
 import guldilin.utils.FilterActionType;
 import guldilin.utils.FilterableField;
 import lombok.*;

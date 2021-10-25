@@ -1,7 +1,7 @@
 package guldilin.filter;
 
 
-import guldilin.entity.ValidationMessages;
+import guldilin.errors.ValidationMessages;
 import guldilin.errors.UnsupportedContentType;
 import guldilin.errors.UnsupportedMethod;
 import guldilin.errors.ValidationException;

@@ -6,7 +6,7 @@ import guldilin.dto.CityDTO;
 import guldilin.entity.City;
 import guldilin.entity.Coordinates;
 import guldilin.entity.Human;
-import guldilin.entity.ValidationMessages;
+import guldilin.errors.ValidationMessages;
 import guldilin.errors.EntryNotFound;
 import guldilin.errors.ValidationException;
 import guldilin.repository.implementation.CrudRepositoryImpl;

@@ -1,6 +1,7 @@
 package guldilin.entity;
 
 import guldilin.dto.CoordinatesDTO;
+import guldilin.errors.ValidationMessages;
 import guldilin.utils.FilterActionType;
 import guldilin.utils.FilterableField;
 import lombok.*;
