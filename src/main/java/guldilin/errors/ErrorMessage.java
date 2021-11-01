@@ -14,4 +14,5 @@ public class ErrorMessage {
     public static final String METHOD_NOT_SUPPORTED = "Method not supported";
     public static final String ENUM_CONSTANT_NOT_FOUND = "Enumeration constant not found";
     public static final String SORTING_FIELD_ERROR = "Cannot Sort By that field. Maybe it does not exist";
+    public static final String WRONG_DATE_FORMAT = "Cannot parse date";
 }

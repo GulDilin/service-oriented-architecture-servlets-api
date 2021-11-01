@@ -3,6 +3,7 @@ package guldilin.entity;
 import guldilin.dto.HumanDTO;
 import guldilin.errors.ErrorCode;
 import guldilin.errors.ValidationException;
+import guldilin.utils.DateParserFactory;
 import guldilin.utils.FilterActionType;
 import guldilin.utils.FilterableField;
 import lombok.*;
@@ -29,15 +30,7 @@ public class Human extends AbstractEntity {
         return Arrays.asList(
                 new FilterableField<>(Integer.class, FilterActionType.COMPARABLE, "id", Integer::parseInt),
                 new FilterableField<>(Date.class, FilterActionType.COMPARABLE, "birthday",
-                        s -> {
-                            try {
-                                return formatter.parse(s);
-                            } catch (ParseException e) {
-                                HashMap<String, String> errors = new HashMap<>();
-                                errors.put("birthday", ErrorCode.WRONG_DATE_FORMAT.name() + " : " + e.getMessage());
-                                throw new IllegalArgumentException(new ValidationException(errors));
-                            }
-                        })
+                        s -> DateParserFactory.parseDate(s, "birthday"))
         );
     }
     @Column(name = "id")
