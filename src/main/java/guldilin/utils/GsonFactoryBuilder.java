@@ -92,7 +92,7 @@ public class GsonFactoryBuilder {
                 .registerTypeAdapterFactory(new IgnoreFailureTypeAdapterFactory())
                 .registerTypeAdapter(Climate.class, new EnumAdapter<>(Climate.class))
                 .serializeNulls()
-                .setDateFormat("yyyy-MM-dd HH:mm:ss")
+                .setDateFormat(DateParserFactory.dateFormat)
                 .create();
         return gson;
     }
