@@ -4,9 +4,7 @@ import com.google.gson.Gson;
 import guldilin.dto.AbstractDTO;
 import guldilin.dto.EntityListDTO;
 import guldilin.entity.AbstractEntity;
-import guldilin.errors.EntryNotFound;
-import guldilin.errors.FilterTypeNotFound;
-import guldilin.errors.FilterTypeNotSupported;
+import guldilin.errors.*;
 import guldilin.repository.interfaces.CrudRepository;
 import guldilin.utils.FilterAction;
 import guldilin.utils.FilterActionParser;
@@ -87,7 +85,16 @@ public class CrudController<T extends AbstractEntity, D extends AbstractDTO> {
         List<Order> orders = orderingMap
                 .entrySet()
                 .stream()
-                .map(e -> e.getValue().apply(root.get(e.getKey())))
+                .map(e -> {
+                    try {
+                        return e.getValue().apply(root.get(e.getKey()));
+                    } catch (IllegalArgumentException ef) {
+                        HashMap<String, String> errorsMap = new HashMap<>();
+                        errorsMap.put(e.getKey(), ErrorMessage.SORTING_FIELD_ERROR);
+                        ef.initCause(new ValidationException(errorsMap));
+                        throw ef;
+                    }
+                })
                 .collect(Collectors.toList());
         criteria.orderBy(orders);
     }

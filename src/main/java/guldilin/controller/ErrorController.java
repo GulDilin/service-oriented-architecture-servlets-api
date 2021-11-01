@@ -86,6 +86,13 @@ public class ErrorController extends HttpServlet {
         return handleException(request, response, persistenceException.getCause());
     }
 
+    protected Object handleCauseException(HttpServletRequest request, HttpServletResponse response,
+                                                Throwable throwable)
+            throws IOException {
+        Exception causedException = (Exception) throwable;
+        return handleException(request, response, causedException.getCause());
+    }
+
     protected Object handleJsonException(HttpServletResponse response,
                                                 Throwable throwable) {
         throwable.printStackTrace();
@@ -113,6 +120,8 @@ public class ErrorController extends HttpServlet {
                 return handlePersistenceException(request, response, throwable);
             case "com.google.gson.JsonSyntaxException":
                 return handleJsonException(response, throwable);
+            case "java.lang.IllegalArgumentException":
+                return handleCauseException(request, response, throwable);
             default:
                 return handleDefaultError(request, response, throwable, errorName);
         }
