@@ -31,7 +31,7 @@ import java.util.List;
 @ToString
 public class City extends AbstractEntity {
     public static List<FilterableField<?>> getFilterableFields() {
-        final String dateFormat = "yyyy-MM-dd";
+        final String dateFormat = "yyyy-MM-dd.HH:mm:ss";
         SimpleDateFormat formatter = new SimpleDateFormat(dateFormat);
         return Arrays.asList(
                 new FilterableField<>(Long.class, FilterActionType.COMPARABLE, "id", Long::parseLong),
@@ -53,7 +53,7 @@ public class City extends AbstractEntity {
                 new FilterableField<>(Integer.class, FilterActionType.COMPARABLE, "carCode", Integer::parseInt),
                 new FilterableField<>(Integer.class, FilterActionType.COMPARABLE, "coordinates", Integer::parseInt),
                 new FilterableField<>(Integer.class, FilterActionType.COMPARABLE, "governor", Integer::parseInt),
-                new FilterableField<>(String.class, FilterActionType.EQUAL_ONLY, "climate", s -> s)
+                new FilterableField<>(Climate.class, FilterActionType.EQUAL_ONLY, "climate", Climate::valueOf)
         );
     }
 

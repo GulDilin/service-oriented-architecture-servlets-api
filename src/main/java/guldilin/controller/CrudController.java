@@ -129,15 +129,21 @@ public class CrudController<T extends AbstractEntity, D extends AbstractDTO> {
     }
 
     void doGet(HttpServletRequest request, HttpServletResponse response)
-            throws IOException, FilterTypeNotFound, FilterTypeNotSupported, EntryNotFound {
+            throws IOException, FilterTypeNotFound, FilterTypeNotSupported, EntryNotFound, ValidationException {
         Optional<Integer> id = Optional.ofNullable((Integer) request.getAttribute("id"));
         if (id.isPresent()) {
             this.doGetById(id.get(), response);
             return;
         }
 
-        Integer limit = Optional.ofNullable(request.getParameter("limit")).map(Integer::parseInt).orElse(10);
-        Integer offset = Optional.ofNullable(request.getParameter("offset")).map(Integer::parseInt).orElse(0);
+        int limit = Optional.ofNullable(request.getParameter("limit")).map(Integer::parseInt).orElse(10);
+        int offset = Optional.ofNullable(request.getParameter("offset")).map(Integer::parseInt).orElse(0);
+        if (limit < 0 || offset < 0) {
+            HashMap<String, String> errors = new HashMap<>();
+            if (limit < 0) errors.put("limit", ErrorMessage.MIN_0);
+            if (offset < 0) errors.put("offset", ErrorMessage.MIN_0);
+            throw new ValidationException(errors);
+        }
         String[] orderings = request.getParameterValues("sorting");
 
         Long total = getTotalCount(request);
@@ -180,7 +186,7 @@ public class CrudController<T extends AbstractEntity, D extends AbstractDTO> {
         T entry = mapToEntity.apply(parseBodyDTO(request));
         entry.setId((Integer) request.getAttribute("id"));
         entry = repository.update(entry);
-        response.getWriter().write(gson.toJson(entry.mapToDTO()));
+        doGetById(entry.getId(), response);
     }
 
     void doDelete(HttpServletRequest request) throws EntryNotFound {

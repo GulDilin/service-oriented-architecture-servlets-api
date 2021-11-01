@@ -24,7 +24,7 @@ import java.util.List;
 @NoArgsConstructor
 public class Human extends AbstractEntity {
     public static List<FilterableField<?>> getFilterableFields() {
-        final String dateFormat = "yyyy-MM-dd";
+        final String dateFormat = "yyyy-MM-dd.HH:mm:ss";
         SimpleDateFormat formatter = new SimpleDateFormat(dateFormat);
         return Arrays.asList(
                 new FilterableField<>(Integer.class, FilterActionType.COMPARABLE, "id", Integer::parseInt),
