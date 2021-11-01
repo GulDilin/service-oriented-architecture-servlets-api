@@ -10,8 +10,9 @@ import java.util.Date;
 import java.util.HashMap;
 
 public class DateParserFactory {
+    public static String dateFormat = "yyyy-MM-dd'T'HH:mm:ss.SSS";
+
     public static Date parseDate(String s, String fieldName) {
-        String dateFormat = "yyyy-MM-dd.HH:mm:ss";
         SimpleDateFormat formatter = new SimpleDateFormat(dateFormat);
         if (s.length() > dateFormat.length()) {
             HashMap<String, String> errors = new HashMap<>();
