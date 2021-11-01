@@ -2,6 +2,7 @@ package guldilin.entity;
 
 import guldilin.dto.CityDTO;
 import guldilin.errors.ErrorMessage;
+import guldilin.errors.ValidationException;
 import guldilin.utils.DateParserFactory;
 import guldilin.utils.FilterActionType;
 import guldilin.utils.FilterableField;
@@ -16,6 +17,7 @@ import javax.validation.constraints.NotNull;
 import java.sql.Timestamp;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 
 @EqualsAndHashCode(callSuper = true)
@@ -39,7 +41,16 @@ public class City extends AbstractEntity {
                 new FilterableField<>(Integer.class, FilterActionType.COMPARABLE, "carCode", Integer::parseInt),
                 new FilterableField<>(Integer.class, FilterActionType.COMPARABLE, "coordinates", Integer::parseInt),
                 new FilterableField<>(Integer.class, FilterActionType.COMPARABLE, "governor", Integer::parseInt),
-                new FilterableField<>(Climate.class, FilterActionType.EQUAL_ONLY, "climate", Climate::valueOf)
+                new FilterableField<>(Climate.class, FilterActionType.EQUAL_ONLY, "climate", s -> {
+                    try {
+                        return Climate.valueOf(s);
+                    } catch (IllegalArgumentException exc) {
+                        HashMap<String, String> errors = new HashMap<>();
+                        errors.put("climate", ErrorMessage.ENUM_CONSTANT_NOT_FOUND);
+                        exc.initCause(new ValidationException(errors));
+                        throw exc;
+                    }
+                })
         );
     }
 

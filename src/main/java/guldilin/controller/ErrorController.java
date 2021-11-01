@@ -82,15 +82,15 @@ public class ErrorController extends HttpServlet {
     protected Object handlePersistenceException(HttpServletRequest request, HttpServletResponse response,
                                   Throwable throwable)
             throws IOException {
-        PersistenceException persistenceException = (PersistenceException) throwable;
-        return handleException(request, response, persistenceException.getCause());
+        return handleCauseException(request, response, throwable);
     }
 
     protected Object handleCauseException(HttpServletRequest request, HttpServletResponse response,
                                                 Throwable throwable)
             throws IOException {
         Exception causedException = (Exception) throwable;
-        return handleException(request, response, causedException.getCause());
+        if (causedException.getCause() != null) return handleException(request, response, causedException.getCause());
+        else return handleDefaultError(request, response, throwable, throwable.getClass().getName());
     }
 
     protected Object handleJsonException(HttpServletResponse response,
