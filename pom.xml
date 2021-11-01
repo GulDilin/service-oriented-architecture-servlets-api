@@ -96,6 +96,11 @@
       <scope>provided</scope>
     </dependency>
 
+    <dependency>
+      <groupId>org.tuckey</groupId>
+      <artifactId>urlrewritefilter</artifactId>
+      <version>4.0.4</version>
+    </dependency>
   </dependencies>
 
   <build>
@@ -139,6 +144,29 @@
           <artifactId>maven-failsafe-plugin</artifactId>
           <version>2.22.2</version>
         </plugin>
+        <plugin>
+          <groupId>org.apache.tomcat.maven</groupId>
+          <artifactId>tomcat7-maven-plugin</artifactId>
+          <version>2.2</version>
+          <configuration>
+            <url>http://localhost:26449/manager/text</url>
+            <server>TomcatHelios</server>
+            <path>/soa-1</path>
+          </configuration>
+        </plugin>
+        <plugin>
+          <groupId>org.codehaus.cargo</groupId>
+          <artifactId>cargo-maven2-plugin</artifactId>
+          <version>1.7.6</version>
+          <configuration>
+            <container>
+              <containerId>tomcat9x</containerId>
+              <type>embedded</type>
+            </container>
+          </configuration>
+        </plugin>
+
+
       </plugins>
     </pluginManagement>
   </build>

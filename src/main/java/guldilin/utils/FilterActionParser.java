@@ -25,6 +25,8 @@ public class FilterActionParser {
         }
         switch (actionType) {
             case COMPARABLE:
+                if (filterType == FilterType.CONTAINS)
+                    throw new FilterTypeNotSupported();
                 break;
             case CONTAINS:
                 if (filterType != FilterType.EQUALS && filterType != FilterType.CONTAINS)

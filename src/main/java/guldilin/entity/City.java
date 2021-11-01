@@ -1,7 +1,9 @@
 package guldilin.entity;
 
 import guldilin.dto.CityDTO;
+import guldilin.errors.ErrorCode;
 import guldilin.errors.ErrorMessage;
+import guldilin.errors.ValidationException;
 import guldilin.utils.FilterActionType;
 import guldilin.utils.FilterableField;
 import lombok.*;
@@ -17,6 +19,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 
 @EqualsAndHashCode(callSuper = true)
@@ -28,7 +31,8 @@ import java.util.List;
 @ToString
 public class City extends AbstractEntity {
     public static List<FilterableField<?>> getFilterableFields() {
-        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
+        final String dateFormat = "yyyy-MM-dd";
+        SimpleDateFormat formatter = new SimpleDateFormat(dateFormat);
         return Arrays.asList(
                 new FilterableField<>(Long.class, FilterActionType.COMPARABLE, "id", Long::parseLong),
                 new FilterableField<>(String.class, FilterActionType.CONTAINS, "name", s -> s),
@@ -37,7 +41,9 @@ public class City extends AbstractEntity {
                             try {
                                 return formatter.parse(s);
                             } catch (ParseException e) {
-                                return null;
+                                HashMap<String, String> errors = new HashMap<>();
+                                errors.put("creationDate", ErrorCode.WRONG_DATE_FORMAT.name() + " : " + e.getMessage());
+                                throw new IllegalArgumentException(new ValidationException(errors));
                             }
                         }),
                 new FilterableField<>(Float.class, FilterActionType.COMPARABLE, "metersAboveSeaLevel", Float::parseFloat),
@@ -46,7 +52,8 @@ public class City extends AbstractEntity {
                 new FilterableField<>(Integer.class, FilterActionType.COMPARABLE, "populationDensity", Integer::parseInt),
                 new FilterableField<>(Integer.class, FilterActionType.COMPARABLE, "carCode", Integer::parseInt),
                 new FilterableField<>(Integer.class, FilterActionType.COMPARABLE, "coordinates", Integer::parseInt),
-                new FilterableField<>(Integer.class, FilterActionType.COMPARABLE, "governor", Integer::parseInt)
+                new FilterableField<>(Integer.class, FilterActionType.COMPARABLE, "governor", Integer::parseInt),
+                new FilterableField<>(String.class, FilterActionType.EQUAL_ONLY, "climate", s -> s)
         );
     }
 
